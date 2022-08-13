@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form>
+       <label for="name">Device Name (do not change): </label>
+       <input id="name" type="text" value="BSKY" placeholder="Device Name"><br>
+       <button id="scan">Connect</button>
+       <!-- <button id="reconnect">Reconnect</button>
+       <button id="disconnect">Disconnect</button><br> -->
+       <hr> 
+       <label for="deviceid">Device ID: </label>
+       <input id="deviceid" type="text" value="" readonly placeholder="Device ID"><br>
+       <label for="status">Device Status: </label>
+       <input id="status" type="text" value="" readonly placeholder="Status">
+       <svg xmlns="http://www.w3.org/2000/svg" id="getStatus" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" style="vertical-align: middle;" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+          <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+       </svg>
+       <br>
+       <hr>
+       <input id="wifi_ssid" type="text" autofocus="" placeholder="Your WIFI SSID"><br>
+       <input id="wifi_pass" type="text" value="" placeholder="Your WIFI Password"><br>
+       <button id="updatewifi">Update WIFI</button><br> 
+       <!-- 
+       <hr>
+       <button id="getDetails">Get device details</button>
+       <button id="getStatus">Status</button>
+       <button id="getTest">Test</button>
+       <button id="getTestSend">Test Send</button><br> 
+       -->
+    </form>
+
+    <div id="details"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
