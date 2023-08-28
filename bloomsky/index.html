@@ -7,10 +7,13 @@
     <title>Document</title>
   </head>
   <body>
+     <h3>Bloomsky WIFI parameters config (via bluetooth)</h3>
+     Please hard reset your SKY2 first pushing the power button briefly and then by holding the wifi button for 8+ seconds (may have to repeat multiple times). The wifi icon must blink <b>alternate</b> colors.<br>
+     <hr>
     <form>
        <label for="name">Device Name (do not change): </label>
        <input id="name" type="text" value="BSKY" placeholder="Device Name"><br>
-       <button id="scan">Connect</button>
+       <button id="scan">Connect to SKY2 via Bluetooth</button>
        <!-- <button id="reconnect">Reconnect</button>
        <button id="disconnect">Disconnect</button><br> -->
        <hr> 
@@ -26,11 +29,19 @@
        <hr>
        <input id="wifi_ssid" type="text" autofocus="" placeholder="Your WIFI SSID"><br>
        <input id="wifi_pass" type="text" value="" placeholder="Your WIFI Password"><br>
-       <button id="updatewifi">Update WIFI</button><br> 
-       <!-- 
+       <button id="updatewifi">Update WIFI</button>
+       <button id="reboot">Reboot</button><br> 
+       <hr>
+       Note: After you update WIFI wait until the status changes (by clicking on the refresh icon) to:<br>
+       1: Wait -- keep waiting -- if more than 30s something else went wrong<br>
+       3: Good -- you are connected and pinging gateway -- you can't change them without hard resetting again. you can now reboot.<br>
+       4: Not Good -- issues with writing ssid/pass -- check your/my code.<br>
+       5: Not Good -- couldn't connect wifi -- try again -- most likely a reboot needed.<br>
+       <br>
+       <b>For browsers with Bluetooth API support only e.g. Chrome.</b><br><br>
+       <!--
        <hr>
        <button id="getDetails">Get device details</button>
-       <button id="getStatus">Status</button>
        <button id="getTest">Test</button>
        <button id="getTestSend">Test Send</button><br> 
        -->
