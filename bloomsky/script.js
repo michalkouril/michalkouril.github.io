@@ -18,9 +18,6 @@ var bluetoothDevice;
 function onScanButtonClick() {
   let options = {filters: []};
 
-  // options.filters.push({optionalServices: ['00001800-0000-1000-8000-00805f9b34fb']});
-  // let access = 'generic_access';
-
   options.filters.push({services: [svc_1802,svc_1803,svc_1804]});
 
   let filterName = document.querySelector('#name').value;
@@ -37,6 +34,7 @@ function onScanButtonClick() {
     return connect();
   })
   .catch(error => {
+    alert('Connection error: '+error);
     log('Argh! ' + error);
   });
 }
@@ -112,6 +110,7 @@ function onDisconnectButtonClick() {
 function onDisconnected(event) {
   // Object event.target is Bluetooth Device getting disconnected.
   log('> Bluetooth Device disconnected');
+  alert('SKY2 disconnected');
 }
 
 
@@ -133,6 +132,66 @@ function onUpdateWifiButtonClick() {
   log("onUpdateWifiButtonClick")
   if (!bluetoothDevice) {
     log("no bluetoothDevice")
+    alert('SKY2 not connected');
+    return;
+  }
+  if (!(bluetoothDevice.gatt.connected)) {
+    log("not connected")
+    alert('SKY2 not connected');
+    return;
+  }
+
+  let encoder = new TextEncoder('utf-8');
+  let ssid = encoder.encode(document.querySelector('#wifi_ssid').value);
+  let pass = encoder.encode(document.querySelector('#wifi_pass').value);
+
+  if (ssid == "" || pass == "") {
+     log(`empty ssid (${ssid}) or password (${pass})`);
+     alert("Please make sure WIFI SSID and WIFI Password are filled out");
+     return;
+  }
+
+  log(`Writing ${ssid} and password`);
+  log('writing status 1 -- start setup?');
+  handle_1804.writeValue(new Uint8Array([1]))
+  .then(value => {
+     log('writing status 3 -- allocate ssid?');
+     return handle_1804.writeValue(new Uint8Array([3]))
+  })
+  .then(value => {
+     log("writing ssid");
+     return handle_1803.writeValue(ssid)
+  })
+  .then(value => {
+     log('writing status 2 -- allocate wifi password?');
+     return handle_1804.writeValue(new Uint8Array([2]))
+  })
+  .then(value => {
+     log("writing pass");
+     return handle_1802.writeValue(pass)
+  })
+  .then(value => {
+     log('writing status 4 -- write new wifi config');
+     return handle_1804.writeValue(new Uint8Array([4]))
+  })
+  .then(value => {
+     log('writing status 5 -- start wifi connect test -- this is optional');
+     return handle_1804.writeValue(new Uint8Array([5]))
+  })
+   /*
+  .then(value => {
+     log('writing status 6 -- ??');
+     return handle_1804.writeValue(new Uint8Array([5]))
+  })
+  */
+  .then(value => {
+     log("Done");
+  })
+}
+
+function onRebootButtonClick() {
+  if (!bluetoothDevice) {
+    log("no bluetoothDevice")
     return;
   }
   if (!(bluetoothDevice.gatt.connected)) {
@@ -140,42 +199,13 @@ function onUpdateWifiButtonClick() {
     return;
   }
 
-  let encoder = new TextEncoder('utf-8');
-  let ssid = encoder.encode(document.querySelector('#wifi_ssid').value);
-  let pass = encoder.encode(document.querySelector('#wifi_pass').value);
-  let step = new Uint8Array([1]).buffer;
-  log(step);
-
-  log(`Writing ${ssid} and password`);
-  handle_1804.writeValue(new Uint8Array([1]))
-  .then(value => {
-     log("3:");
-     return handle_1804.writeValue(new Uint8Array([3]))
-  })
-  .then(value => {
-     log("3: writing ssid");
-     return handle_1803.writeValue(ssid)
-  })
-  .then(value => {
-     log("2:");
-     return handle_1804.writeValue(new Uint8Array([2]))
-  })
-  .then(value => {
-     log("2: writing pass");
-     return handle_1802.writeValue(pass)
-  })
-  .then(value => {
-     log("4:");
-     return handle_1804.writeValue(new Uint8Array([4]))
-  })
-  .then(value => {
-     log("5:");
-     return handle_1804.writeValue(new Uint8Array([5]))
-  })
+  log("writing status 7 - reboot ");
+  handle_1804.writeValue(new Uint8Array([7]))
   .then(value => {
      log("Done");
   })
 }
+
 
 function onDetailsButtonClick() {
   log("onDetailsButtonClick")
@@ -196,7 +226,8 @@ function onDetailsButtonClick() {
 }
 
 function onStatusButtonClick() {
-  log("onDetailsButtonClick")
+  log("onStatusButtonClick")
+
   if (!bluetoothDevice) {
     log("no bluetoothDevice")
     return;
@@ -221,15 +252,13 @@ function onStatusButtonClick() {
      return characteristic.readValue();
   })
   .then(value => {
-      // log(value.toString());
-      //console.log(`Battery percentage is ${value.getUint8(0)}`);
       log(`Status is ${value.getUint8(0)}`);
       document.querySelector('#status').value = value.getUint8(0);
   })
 }
 
 function onTestButtonClick() {
-  log("onDetailsButtonClick")
+  log("onTestButtonClick")
   if (!bluetoothDevice) {
     log("no bluetoothDevice")
     return;
@@ -273,37 +302,11 @@ function onTestSendButtonClick() {
     log("not connected")
     return;
   }
-  handle_1802.readValue()
+
+  handle_1804.writeValue(new Uint8Array([0]))
   .then(value => {
-      var enc = new TextDecoder("utf-8");
-      log(enc.decode(value));
-      // log(value);
-      // log(value.toString());
-      //console.log(`Battery percentage is ${value.getUint8(0)}`);
-      // log(`Status is ${value.getUint8(0)}`);
+     log("Done: "+value);
   })
-/*
-  bluetoothDevice.gatt.connect()
-  .then(server => {
-    log('Getting Service...');
-    return server.getPrimaryService(svc_1804);
-  })
-  .then(service => {
-    log('Getting Characteristic...');
-    // x=service.getCharacteristics(); // (characteristicUuid);
-    // log(x);
-    return service.getCharacteristic(char_1804_3a03);
-  })
-  .then(characteristic => {
-    data = new Uint8Array([6]);
-    // let encoder = new TextEncoder('utf-8');
-    // let sendMsg = encoder.encode("hello");
-    // x=myCharacteristic.writeValue(sendMsg);
-    x=characteristic.writeValue(data.buffer);
-    log(data);
-    log(x);
-  })
-  */
 }
 
   document.querySelector('#scan').addEventListener('click', function(event) {
@@ -332,24 +335,6 @@ function onTestSendButtonClick() {
       onReconnectButtonClick();
     }
   });
-  */
-  document.querySelector('#getStatus').addEventListener('click', function(event) {
-    event.stopPropagation();
-    event.preventDefault();
-
-    if (isWebBluetoothEnabled()) {
-      onStatusButtonClick();
-    }
-  });
-  document.querySelector('#updatewifi').addEventListener('click', function(event) {
-    event.stopPropagation();
-    event.preventDefault();
-
-    if (isWebBluetoothEnabled()) {
-      onUpdateWifiButtonClick();
-    }
-  });
-/*
   document.querySelector('#getDetails').addEventListener('click', function(event) {
     event.stopPropagation();
     event.preventDefault();
@@ -374,7 +359,33 @@ function onTestSendButtonClick() {
       onTestSendButtonClick();
     }
   });
+  
   */
+  document.querySelector('#getStatus').addEventListener('click', function(event) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (isWebBluetoothEnabled()) {
+      onStatusButtonClick();
+    }
+  });
+  document.querySelector('#updatewifi').addEventListener('click', function(event) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (isWebBluetoothEnabled()) {
+      onUpdateWifiButtonClick();
+    }
+  });
+  document.querySelector('#reboot').addEventListener('click', function(event) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (isWebBluetoothEnabled()) {
+      onRebootButtonClick();
+    }
+  });
+
 
 
 
@@ -392,4 +403,3 @@ function onTestSendButtonClick() {
       return false;
     }
   }
-
