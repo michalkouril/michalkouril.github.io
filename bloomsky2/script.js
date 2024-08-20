@@ -230,10 +230,12 @@ function onStatusButtonClick() {
 
   if (!bluetoothDevice) {
     log("no bluetoothDevice")
+    document.querySelector('#status').value = "no bluetooth device setup";
     return;
   }
   if (!(bluetoothDevice.gatt.connected)) {
     log("not connected")
+    document.querySelector('#status').value = "no bluetooth device connected";
     return;
   }
 
