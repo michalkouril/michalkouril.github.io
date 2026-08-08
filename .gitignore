@@ -1,0 +1,7 @@
+# Source documents used to write the site — not published.
+# GitHub Pages serves everything committed to this repo, so keep CV/biosketch
+# drafts out of git until they are reviewed and intentionally published.
+*.docx
+*.doc
+*Biosketch*
+*CV*

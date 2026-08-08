@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BloomSky SKY1 Wi-Fi Configurator — Michal Kouril</title>
+    <meta name="description" content="How to change the Wi-Fi SSID and password on a BloomSky SKY1 weather station using the cooee multicast provisioning protocol.">
+    <link rel="stylesheet" href="../assets/subpage.css" />
+  </head>
+  <body>
+     <div class="sitebar"><a href="../">&larr;&nbsp; Michal Kouril</a></div>
+     <h3>How to change Bloomsky WIFI parameters (via cooee - SKY1 only)</h3>
+SKY1 uses cooee (listening to WiFi 2.4GHz multicast packets) for WiFi SSID/Password configuration. The packets are encrypted. See the utility in the cooee folder.<br>
+     Hard reset your SKY1:<br>
+     <ol type="1">
+     <li>turn on SKY1 (left button)</li>
+     <li>when the device is running for a moment hold wifi button for 10s and release (WARNING -- this will wipe the existing WiFi SSID/Password)</li>
+     <li>run the utility</li>
+     </ol>
+Note: it may take a while (minutes) -- try restarting the device if not working.
+
+<pre>
+$ python3 cooee_send.py --ssid MyWiFiNetwork --password S3cured
+retrying... elapsed 3s
+retrying... elapsed 5s
+retrying... elapsed 8s
+retrying... elapsed 10s
+Received discovery response from 10.100.1.89 device ID 94A1A2712345 (SKY1)
+Sending restart command... 
+</pre>
+
+Download <a href="cooee_send.py">cooee_send.py</a>
+
+<h3>FAQ</h3>
+
+1. SKY1 vs. SKY2<br>
+
+<ul>
+  <li>SKY1 has two sensor windows next two the camera. SKY2 does not.</li>
+  <li>SKY2 has bluetooth for WiFi setup. SKY1 does not.</li>
+</ul>
+
+<footer class="sitefoot">
+  Have a SKY2 instead? Use the <a href="../bloomsky2/">Bluetooth configurator</a>.
+  &nbsp;·&nbsp; <a href="../">michalkouril.com</a>
+</footer>
+  </body>
+</html>
