@@ -20,6 +20,9 @@
 <meta property="og:url" content="https://www.michalkouril.com/">
 <meta name="twitter:card" content="summary">
 
+<!-- Apply a saved theme choice before first paint, so switching does not flash. -->
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230d9488'/><text x='50' y='71' font-size='58' font-family='Georgia,serif' font-weight='700' fill='white' text-anchor='middle'>MK</text></svg>">
 
 <style>
@@ -39,8 +42,12 @@
     --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
     --maxw:56rem;
   }
+  /* Dark palette, defined once per selector so the footer toggle can override
+     the operating system in either direction:
+       - OS says dark, and the reader has not forced light
+       - reader has explicitly chosen dark                                    */
   @media (prefers-color-scheme:dark){
-    :root{
+    :root:not([data-theme="light"]){
       --bg:#0f1216;
       --bg-soft:#151a20;
       --bg-card:#151a20;
@@ -52,6 +59,18 @@
       --accent-soft:#12312d;
       --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
     }
+  }
+  :root[data-theme="dark"]{
+      --bg:#0f1216;
+      --bg-soft:#151a20;
+      --bg-card:#151a20;
+      --ink:#e9edf2;
+      --ink-2:#b6bec9;
+      --ink-3:#8c96a3;
+      --rule:#252c35;
+      --accent:#5eead4;
+      --accent-soft:#12312d;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
   }
 
   *,*::before,*::after{box-sizing:border-box}
@@ -69,6 +88,24 @@
 
   a{color:var(--accent);text-underline-offset:.18em;text-decoration-thickness:.06em}
   a:hover{text-decoration-thickness:.12em}
+
+  /* Glossary links: background reading on a term, not somewhere the reader is
+     being sent. Kept in the body text colour with a dotted rule so they stay
+     out of the way of the real links. */
+  a.gloss{
+    color:inherit;
+    text-decoration:underline dotted;
+    text-decoration-thickness:.05em;
+    text-decoration-color:color-mix(in srgb, var(--accent) 50%, transparent);
+    text-underline-offset:.22em;
+  }
+  a.gloss:hover,a.gloss:focus-visible{
+    color:var(--accent);
+    text-decoration-style:solid;
+    text-decoration-color:currentColor;
+  }
+  /* inside a stretched-link card, lift the gloss above the click overlay */
+  .project a.gloss{position:relative;z-index:1}
 
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 1.5rem}
 
@@ -107,7 +144,8 @@
     font-family:var(--serif);font-size:2.6rem;font-weight:700;letter-spacing:.02em;
     box-shadow:var(--shadow);
   }
-  @media (prefers-color-scheme:dark){ .monogram{color:#07110f} }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .monogram{color:#07110f} }
+  :root[data-theme="dark"] .monogram{color:#07110f}
   h1{
     font-family:var(--serif);font-size:clamp(2.1rem,5.5vw,3rem);line-height:1.12;
     margin:0 0 .5rem;letter-spacing:-.015em;font-weight:700;
@@ -256,6 +294,24 @@
 
   footer{padding:2.25rem 0 3rem;font-size:.83rem;color:var(--ink-3)}
   footer p{margin:0 0 .35rem}
+  footer .wrap{display:flex;align-items:flex-start;gap:1.5rem}
+  footer .colophon{flex:1}
+
+  /* ---------- theme toggle ---------- */
+  #theme-toggle{
+    flex:none;display:inline-flex;align-items:center;gap:.45rem;
+    font:inherit;font-size:.8rem;font-weight:500;color:var(--ink-2);
+    background:var(--bg-card);border:1px solid var(--rule);border-radius:999px;
+    padding:.4rem .8rem;cursor:pointer;
+    transition:border-color .15s, color .15s;
+  }
+  #theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+  #theme-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  #theme-toggle svg{width:15px;height:15px}
+  #theme-toggle .i-sun{display:none}
+  #theme-toggle[data-effective="dark"] .i-sun{display:block}
+  #theme-toggle[data-effective="dark"] .i-moon{display:none}
+  @media (max-width:640px){ footer .wrap{flex-direction:column-reverse;gap:1.25rem} }
 </style>
 </head>
 <body>
@@ -367,11 +423,11 @@
         of Behavioral Medicine and Clinical Psychology I design data and application architectures
         for web-based dietary interventions in cystic fibrosis, studies of online behavior in at-risk
         teens, and medication-adherence tooling. With marketing and psychology groups I built the
-        technology behind survey-based Implicit Association Tests. And with the computer science
-        department I still work on Boolean satisfiability — reconfigurable high-performance computing
-        applied to combinatorics, where purpose-built SAT solvers on Beowulf and FPGA clusters
-        resolved <em>W</em>(2,&nbsp;6)&nbsp;=&nbsp;1132, the first new two-color van der Waerden
-        number in roughly thirty years, and later <em>W</em>(3,&nbsp;4)&nbsp;=&nbsp;293.
+        technology behind survey-based <a class="gloss" href="https://en.wikipedia.org/wiki/Implicit-association_test" rel="noopener noreferrer" target="_blank">Implicit Association Tests</a>. And with the computer science
+        department I still work on <a class="gloss" href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem" rel="noopener noreferrer" target="_blank">Boolean satisfiability</a> — reconfigurable high-performance computing
+        applied to combinatorics, where purpose-built SAT solvers on Beowulf and <a class="gloss" href="https://en.wikipedia.org/wiki/Field-programmable_gate_array" rel="noopener noreferrer" target="_blank">FPGA</a> clusters
+        resolved <em>W</em>(2,&nbsp;6)&nbsp;=&nbsp;1132, the first new two-color <a class="gloss" href="https://en.wikipedia.org/wiki/Van_der_Waerden_number" rel="noopener noreferrer" target="_blank">van der Waerden
+        number</a> in roughly thirty years, and later <em>W</em>(3,&nbsp;4)&nbsp;=&nbsp;293.
       </p>
     </div>
   </div>
@@ -399,7 +455,7 @@
           internationally, where any single condition may have too few patients at any one site to
           study alone. The DMCC at Cincinnati Children's provides the network's shared clinical
           research infrastructure — protocol and regulatory support, electronic data capture and
-          REDCap services, a cloud data platform, and the patient-engagement and dissemination
+          <a class="gloss" href="https://projectredcap.org/" rel="noopener noreferrer" target="_blank">REDCap</a> services, a cloud data platform, and the patient-engagement and dissemination
           machinery that gets findings back to the communities they concern.
         </p>
         <p class="role">
@@ -458,8 +514,8 @@
         </div>
         <p class="center-meta">NIH · P41 HD095831 · Model organism knowledge base · since 2025</p>
         <p>
-          Echinobase is the international echinoderm model organism knowledge base and a sister
-          database to Xenbase. The current phase gives the resource a stable long-term home on
+          Echinobase is the international <a class="gloss" href="https://en.wikipedia.org/wiki/Echinoderm" rel="noopener noreferrer" target="_blank">echinoderm</a> model organism knowledge base and a sister
+          database to <a class="gloss" href="https://www.xenbase.org/xenbase/" rel="noopener noreferrer" target="_blank">Xenbase</a>. The current phase gives the resource a stable long-term home on
           institutional infrastructure.
         </p>
         <p class="role">
@@ -554,7 +610,7 @@
       </div>
       <div class="project">
         <h3><a class="cover" href="https://pcats.research.cchmc.org/" rel="noopener noreferrer" target="_blank">PCATS</a></h3>
-        <p>A patient-centered shared decision-making tool used at point of care, powered by Bayesian causal inference over observational data. PCATS.JIA supports families and clinicians choosing treatment for newly diagnosed juvenile idiopathic arthritis.</p>
+        <p>A patient-centered shared decision-making tool used at point of care, powered by Bayesian causal inference over observational data. PCATS.JIA supports families and clinicians choosing treatment for newly diagnosed <a class="gloss" href="https://en.wikipedia.org/wiki/Juvenile_idiopathic_arthritis" rel="noopener noreferrer" target="_blank">juvenile idiopathic arthritis</a>.</p>
         <a class="tag" href="https://doi.org/10.3389/fped.2024.1457538" rel="noopener noreferrer" target="_blank" aria-label="Read the paper: Front Pediatr 2024">Front Pediatr 2024</a>
       </div>
       <div class="project">
@@ -867,10 +923,54 @@
 
 <footer>
   <div class="wrap">
-    <p>© 2026 Michal Kouril · <a href="https://www.michalkouril.com/">www.michalkouril.com</a></p>
-    <p>Views expressed here are my own and do not necessarily represent those of Cincinnati Children's Hospital Medical Center or the University of Cincinnati.</p>
+    <div class="colophon">
+      <p>© 2026 Michal Kouril · <a href="https://www.michalkouril.com/">www.michalkouril.com</a></p>
+      <p>Views expressed here are my own and do not necessarily represent those of Cincinnati Children's Hospital Medical Center or the University of Cincinnati.</p>
+    </div>
+    <!-- Revealed by script; without JS it would do nothing, so it stays hidden. -->
+    <button id="theme-toggle" type="button" hidden>
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <span class="label">Dark</span>
+    </button>
   </div>
 </footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var btn  = document.getElementById("theme-toggle");
+  var mq   = window.matchMedia("(prefers-color-scheme: dark)");
+  if (!btn) return;
+  btn.hidden = false;
+
+  // What the reader is actually seeing right now: their explicit choice if
+  // they made one, otherwise whatever the operating system asks for.
+  function effective() {
+    return root.getAttribute("data-theme") || (mq.matches ? "dark" : "light");
+  }
+
+  function sync() {
+    var now  = effective();
+    var next = now === "dark" ? "light" : "dark";
+    btn.dataset.effective = now;                       // swaps the icon
+    btn.querySelector(".label").textContent = next === "dark" ? "Dark" : "Light";
+    btn.setAttribute("aria-label", "Switch to " + next + " theme");
+    btn.title = "Switch to " + next + " theme";
+  }
+
+  btn.addEventListener("click", function () {
+    var next = effective() === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    sync();
+  });
+
+  // Follow the system while the reader has not overridden it.
+  mq.addEventListener("change", sync);
+  sync();
+})();
+</script>
 
 <script type="application/ld+json">
 {

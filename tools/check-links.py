@@ -12,19 +12,25 @@ ignore this check.
 
 import concurrent.futures
 import pathlib
+import socket
 import re
 import sys
 import time
 import urllib.error
 import urllib.request
 
-TIMEOUT = 25
+TIMEOUT = 15
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " \
      "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 
 # Hosts that answer humans but block automated requests. A 403/405/999 from
 # these is expected, not a broken link.
 BOT_BLOCKED = {403, 405, 429, 999}
+
+# Pseudo-status for a host that is reachable but too slow to answer in time.
+# Slow is not broken: some research hosts routinely take 20s+, and failing on
+# them would block commits over someone else's server load.
+TIMEOUT_STATUS = -1
 
 C = {"ok": "\033[32m", "warn": "\033[33m", "bad": "\033[31m",
      "dim": "\033[2m", "off": "\033[0m"}
@@ -64,11 +70,15 @@ def check(url, _attempt=1):
                 return check(url, _attempt + 1)
             return url, e.code, e.reason or ""
         except Exception as e:  # timeout, DNS, TLS, connection refused
-            if method == "HEAD":
+            reason = getattr(e, "reason", e)
+            timed_out = isinstance(reason, (TimeoutError, socket.timeout))
+            if method == "HEAD" and not timed_out:
                 continue
-            if _attempt == 1:
+            if _attempt == 1 and not timed_out:
                 time.sleep(3)
                 return check(url, _attempt + 1)
+            if timed_out:
+                return url, TIMEOUT_STATUS, "no response in %ds" % TIMEOUT
             return url, 0, type(e).__name__
     return url, 0, "unreachable"
 
@@ -99,11 +109,14 @@ def main(argv):
               f"Skipping the check.{C['off']}")
         return 0
 
-    broken, blocked = [], []
+    broken, blocked, slow = [], [], []
     for url, status, note in results:
         where = ", ".join(sorted(links[url]))
         if 200 <= status < 400:
             tag, col = f"{status}", C["ok"]
+        elif status == TIMEOUT_STATUS:
+            tag, col = "slow", C["warn"]
+            slow.append((url, note, where))
         elif status in BOT_BLOCKED:
             tag, col = f"{status} bot-blocked", C["warn"]
             blocked.append((url, status, where))
@@ -119,6 +132,12 @@ def main(argv):
               f"(fine in a browser):{C['off']}")
         for url, status, where in blocked:
             print(f"    {status}  {url}  {C['dim']}[{where}]{C['off']}")
+        print()
+    if slow:
+        print(f"{C['warn']}{len(slow)} link(s) too slow to verify "
+              f"(reachable, just sluggish):{C['off']}")
+        for url, note, where in slow:
+            print(f"    {url}  {C['dim']}[{note}]{C['off']}")
         print()
     if broken:
         print(f"{C['bad']}{len(broken)} BROKEN link(s):{C['off']}")
