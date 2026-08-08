@@ -135,14 +135,14 @@
 
   /* ---------- metrics ---------- */
   .metrics{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
-    background:var(--rule);border:1px solid var(--rule);border-radius:12px;overflow:hidden;
-    margin:2.25rem 0 .6rem;
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:.35rem 1rem;
+    margin:1.75rem 0 0;padding-top:1.1rem;border-top:1px solid var(--rule);
+    font-size:.82rem;color:var(--ink-3);
   }
-  .metrics div{background:var(--bg-card);padding:1.1rem .9rem;text-align:center}
-  .metrics .n{font-family:var(--serif);font-size:1.85rem;font-weight:700;line-height:1;color:var(--ink)}
-  .metrics .l{display:block;margin-top:.4rem;font-size:.76rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
-  .metrics-note{font-size:.78rem;color:var(--ink-3);margin:0}
+  .metrics span{white-space:nowrap}
+  .metrics b{color:var(--ink-2);font-weight:600;font-variant-numeric:tabular-nums}
+  .metrics .src{margin-left:auto;font-size:.78rem}
+  @media (max-width:640px){ .metrics .src{margin-left:0;flex-basis:100%} }
 
   /* ---------- sections ---------- */
   section{padding:3.25rem 0;border-bottom:1px solid var(--rule)}
@@ -287,6 +287,7 @@
         </p>
         <ul class="links">
           <li><a href="https://scholar.google.com/citations?user=duTVse8AAAAJ" rel="me noopener noreferrer" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 1 8.5l11 6.5 9-5.32V17h2V8.5L12 2zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>Google Scholar</a></li>
+          <li><a href="https://orcid.org/0000-0002-4786-7934" rel="me noopener noreferrer" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM7.369 4.378c.525 0 .947.431.947.947 0 .525-.422.947-.947.947a.95.95 0 0 1-.947-.947c0-.525.422-.947.947-.947zm-.722 3.038h1.444v10.041H6.647V7.416zm3.562 0h3.9c3.712 0 5.344 2.653 5.344 5.025 0 2.578-2.016 5.025-5.325 5.025h-3.919V7.416zm1.444 1.303v7.444h2.297c2.359 0 3.588-1.444 3.588-3.722 0-2.016-1.031-3.722-3.588-3.722h-2.297z"/></svg>ORCID</a></li>
           <li><a href="https://www.cincinnatichildrens.org/bio/k/michal-kouril" rel="noopener noreferrer" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 2 7v2h20V7L12 2zM4 11v7H2v2h20v-2h-2v-7h-2v7h-3v-7h-2v7h-2v-7H9v7H6v-7H4z"/></svg>CCHMC Profile</a></li>
           <li><a href="https://www.linkedin.com/in/michal-kouril-5743a8/" rel="me noopener noreferrer" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.76V21h-4v-5.6c0-1.34-.03-3.06-1.9-3.06-1.9 0-2.2 1.45-2.2 2.96V21h-4V9z"/></svg>LinkedIn</a></li>
           <li><a href="https://github.com/michalkouril" rel="me noopener noreferrer" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.26.8-.57v-2q-3.34.73-4.04-1.6c-.28-.72-.68-.91-.68-.91-.56-.38.04-.37.04-.37.62.04.94.63.94.63.55.94 1.44.67 1.8.51.05-.4.21-.67.39-.83-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.62-5.48 5.92.22.18.4.55.4 1.11v3.29c0 .31.21.68.81.57A12 12 0 0 0 12 .5z"/></svg>GitHub</a></li>
@@ -296,12 +297,12 @@
       </div>
     </div>
 
-    <div class="metrics">
-      <div><span class="n">3,248</span><span class="l">Citations</span></div>
-      <div><span class="n">25</span><span class="l">h-index</span></div>
-      <div><span class="n">39</span><span class="l">i10-index</span></div>
-    </div>
-    <p class="metrics-note">Source: <a href="https://scholar.google.com/citations?user=duTVse8AAAAJ" rel="noopener noreferrer" target="_blank">Google Scholar</a>, August 2026.</p>
+    <p class="metrics">
+      <span><b>3,248</b> citations</span>
+      <span><b>25</b> h-index</span>
+      <span><b>39</b> i10-index</span>
+      <span class="src"><a href="https://scholar.google.com/citations?user=duTVse8AAAAJ" rel="noopener noreferrer" target="_blank">Google Scholar</a>, Aug 2026</span>
+    </p>
   </div>
 </header>
 
@@ -447,7 +448,7 @@
         </p>
         <p class="role">
           <b>My role:</b> establishing the on-premises datacenter resources at Cincinnati Children's
-          to create an online replicate of the database and software from the University of Calgary.
+          to create an online replica of the database and software from the University of Calgary.
         </p>
       </article>
 
@@ -821,6 +822,10 @@
         <dd>Cincinnati Children's Hospital Medical Center<br>3333 Burnet Avenue<br>Cincinnati, OH 45229</dd>
       </div>
       <div>
+        <dt>ORCID iD</dt>
+        <dd><a href="https://orcid.org/0000-0002-4786-7934" rel="me noopener noreferrer" target="_blank">0000-0002-4786-7934</a></dd>
+      </div>
+      <div>
         <dt>Elsewhere</dt>
         <dd>
           <a href="https://scholar.google.com/citations?user=duTVse8AAAAJ" rel="noopener noreferrer" target="_blank">Scholar</a> ·
@@ -887,7 +892,14 @@
     "SAT Solving",
     "Combinatorics"
   ],
+  "identifier": {
+    "@type": "PropertyValue",
+    "propertyID": "ORCID",
+    "value": "0000-0002-4786-7934",
+    "url": "https://orcid.org/0000-0002-4786-7934"
+  },
   "sameAs": [
+    "https://orcid.org/0000-0002-4786-7934",
     "https://scholar.google.com/citations?user=duTVse8AAAAJ",
     "https://dblp.org/pid/57/6309.html",
     "https://github.com/michalkouril",
