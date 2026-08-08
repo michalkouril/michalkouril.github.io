@@ -1,0 +1,26 @@
+name: Check links
+
+# Runs on every push that touches the site, on pull requests, weekly so that
+# link rot gets caught even when nothing changes, and on demand from the
+# Actions tab. Results show as a green check or red X next to each commit.
+on:
+  push:
+    paths: ['**.html', 'tools/check-links.py', '.github/workflows/check-links.yml']
+  pull_request:
+    paths: ['**.html']
+  schedule:
+    - cron: '0 13 * * 1'   # Mondays, 13:00 UTC
+  workflow_dispatch:
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check every outgoing link
+        run: python3 tools/check-links.py

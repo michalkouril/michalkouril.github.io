@@ -1,0 +1,27 @@
+#!/bin/sh
+# Git pre-commit hook: verify outgoing links before a commit lands.
+#
+# Install (from the repo root):
+#     ln -sf ../../tools/pre-commit .git/hooks/pre-commit
+#
+# Only runs when HTML is staged. Skips itself when offline. To commit anyway:
+#     git commit --no-verify
+
+if ! git diff --cached --name-only --diff-filter=ACM | grep -q '\.html$'; then
+    exit 0
+fi
+
+echo "pre-commit: checking outgoing links..."
+if python3 tools/check-links.py; then
+    exit 0
+fi
+
+cat <<'EOF'
+
+Commit stopped: at least one link above is broken.
+Fix the link, or bypass this check with:
+
+    git commit --no-verify
+
+EOF
+exit 1
