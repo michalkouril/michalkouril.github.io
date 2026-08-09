@@ -5,8 +5,8 @@ from `master`.
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | The live homepage. |
-| `index_new.html` | New personal site, under review. Carries a `noindex` tag — **delete that line when promoting it to `index.html`.** |
+| `index.html` | The site: about, coordinating centers, research, software, publications, teaching and service, contact. |
+| `og-card.png` | Social preview image (1200×630), referenced by `og:image`. Regenerate from `og-card.source.html`. |
 | `bloomsky1/`, `bloomsky2/` | Wi-Fi configurators for BloomSky SKY1 and SKY2 weather stations. |
 | `tumblr-infinite-scrolling/` | Hosted copy of a script older Tumblr themes still reference. |
 | `assets/` | Shared stylesheet for the utility subpages. |
