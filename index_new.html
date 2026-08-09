@@ -18,12 +18,18 @@
 <meta property="og:title" content="Michal Kouril, PhD">
 <meta property="og:description" content="Leading informatics for NIH data management and coordinating centers — RDCRN, B2B CHANGE, and LungMAP — at Cincinnati Children's Hospital Medical Center.">
 <meta property="og:url" content="https://www.michalkouril.com/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://www.michalkouril.com/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Michal Kouril, PhD — Biomedical Informatics, Cincinnati Children's Hospital Medical Center">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1216" media="(prefers-color-scheme: dark)">
 
 <!-- Apply a saved theme choice before first paint, so switching does not flash. -->
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230d9488'/><text x='50' y='71' font-size='58' font-family='Georgia,serif' font-weight='700' fill='white' text-anchor='middle'>MK</text></svg>">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='20'%20fill='%230d9488'/%3E%3Ctext%20x='50'%20y='71'%20font-size='58'%20font-family='Georgia,serif'%20font-weight='700'%20fill='white'%20text-anchor='middle'%3EMK%3C/text%3E%3C/svg%3E">
 
 <style>
   :root{
@@ -88,6 +94,9 @@
 
   a{color:var(--accent);text-underline-offset:.18em;text-decoration-thickness:.06em}
   a:hover{text-decoration-thickness:.12em}
+  /* One visible focus ring for every link, so keyboard users get the same
+     treatment the toggle and the card cover links already had. */
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
 
   /* Glossary links: background reading on a term, not somewhere the reader is
      being sent. Kept in the body text colour with a dotted rule so they stay
@@ -132,6 +141,7 @@
     white-space:nowrap;padding:.15rem 0;border-bottom:2px solid transparent;
   }
   .navlinks a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+  .navlinks a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px;color:var(--accent)}
   @media (max-width:640px){ .brand{font-size:.95rem} .navlinks{gap:1rem} }
 
   /* ---------- hero ---------- */
@@ -164,6 +174,7 @@
     background:var(--bg-card);transition:border-color .15s, color .15s, transform .15s;
   }
   .links a:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
+  .links a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;color:var(--accent);border-color:var(--accent)}
   .links svg{width:15px;height:15px;flex:none}
   @media (max-width:640px){
     .hero-grid{flex-direction:column;gap:1.5rem}
@@ -274,6 +285,21 @@
   .project h3 a.cover::after{content:"";position:absolute;inset:0;border-radius:12px}
   .project h3 a.cover:focus-visible::after{outline:2px solid var(--accent);outline-offset:2px}
 
+  /* Every card in Software & Platforms leads off-site, so mark the titles.
+     Drawn as a masked shape rather than generated text, so screen readers
+     never announce it. Scoped to #software: the Projects cards below are
+     mostly internal pages and must not claim otherwise. */
+  #software .project h3::after{
+    content:"";flex:none;width:.68rem;height:.68rem;opacity:.4;
+    background:currentColor;
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M7%2017%2017%207M7%207h10v10'/%3E%3C/svg%3E");
+    mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M7%2017%2017%207M7%207h10v10'/%3E%3C/svg%3E");
+    -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+    -webkit-mask-position:center;mask-position:center;
+    -webkit-mask-size:contain;mask-size:contain;
+  }
+  #software .project:hover h3::after{opacity:1}
+
   .tag{
     display:inline-block;margin-top:auto;
     font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;
@@ -307,10 +333,13 @@
   }
   #theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
   #theme-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  /* The icon reports what the reader is looking at now; the text label reports
+     which of the three settings is active. */
   #theme-toggle svg{width:15px;height:15px}
-  #theme-toggle .i-sun{display:none}
-  #theme-toggle[data-effective="dark"] .i-sun{display:block}
-  #theme-toggle[data-effective="dark"] .i-moon{display:none}
+  #theme-toggle .i-moon{display:none}
+  #theme-toggle .i-sun{display:block}
+  #theme-toggle[data-effective="dark"] .i-sun{display:none}
+  #theme-toggle[data-effective="dark"] .i-moon{display:block}
   @media (max-width:640px){ footer .wrap{flex-direction:column-reverse;gap:1.25rem} }
 </style>
 </head>
@@ -352,7 +381,7 @@
           <a href="https://benchtobassinet.com/" rel="noopener noreferrer" target="_blank">Bench to Bassinet</a>
           congenital heart disease program (<strong>B2B&nbsp;CHANGE</strong>), and
           <a href="https://www.lungmap.net/" rel="noopener noreferrer" target="_blank"><strong>LungMAP</strong></a>, alongside research in
-          clinical NLP, medication-safety analytics, and multi-omics platforms. Earlier, custom
+          clinical NLP, medication-safety analytics, and multi-omics platforms. Alongside it, custom
           FPGA-accelerated SAT solvers settled long-open van der Waerden numbers.
         </p>
         <ul class="links">
@@ -368,7 +397,7 @@
     </div>
 
     <p class="metrics">
-      <span><b>3,248</b> citations</span>
+      <span><b>3,253</b> citations</span>
       <span><b>25</b> h-index</span>
       <span><b>39</b> i10-index</span>
       <span class="src"><a href="https://scholar.google.com/citations?user=duTVse8AAAAJ" rel="noopener noreferrer" target="_blank">Google Scholar</a>, Aug 2026</span>
@@ -384,10 +413,9 @@
     <div class="prose">
       <p>
         I am a Research Associate Professor in the
-        <a href="https://med.uc.edu/depart/pediatrics" rel="noopener noreferrer" target="_blank"><strong>University
-        of Cincinnati Department of Pediatrics</strong></a> and a member of the
+        <strong>University of Cincinnati Department of Pediatrics</strong> and a member of the
         <a href="https://www.cincinnatichildrens.org/research/divisions/b/bmi" rel="noopener noreferrer" target="_blank"><strong>Division
-        of Biomedical Informatics</strong></a> at Cincinnati Children's Hospital Medical Center. I read Information Technology at the
+        of Biomedical Informatics</strong></a> at Cincinnati Children's Hospital Medical Center. I studied Information Technology at the
         University of Economics in Prague, and earned my PhD in Computer Science from the University
         of Cincinnati in 2006 under Prof. Jerome L. Paul.
       </p>
@@ -438,8 +466,9 @@
     <h2>Data Management &amp; Coordinating Centers</h2>
     <p class="prose">
       Cincinnati Children's hosts the coordinating center for several national NIH research
-      consortia. I lead the informatics for these programs — the data platforms, standards and
-      portals that turn multi-site collection into a durable, shareable scientific resource.
+      consortia, and contributes infrastructure to others. I lead the informatics for these
+      programs — the data platforms, standards and portals that turn multi-site collection into a
+      durable, shareable scientific resource.
     </p>
 
     <div class="center-list">
@@ -449,7 +478,7 @@
           <h3><a href="https://www.rarediseasesnetwork.org/dmcc/data-management-and-coordinating-center" rel="noopener noreferrer" target="_blank">RDCRN</a></h3>
           <span class="center-full">Rare Diseases Clinical Research Network</span>
         </div>
-        <p class="center-meta">NIH NCATS · U2C TR002818 · Data Management and Coordinating Center · since 2019</p>
+        <p class="center-meta">NIH NCATS · U2C TR002818 · Data Management and Coordinating Center · my role since 2019</p>
         <p>
           The RDCRN connects consortia studying rare diseases across the United States and
           internationally, where any single condition may have too few patients at any one site to
@@ -469,7 +498,7 @@
           <h3><a href="https://benchtobassinet.com/" rel="noopener noreferrer" target="_blank">B2B CHANGE</a></h3>
           <span class="center-full">Bench to Bassinet — Congenital Heart disease Advancing New understanding in GEnomics</span>
         </div>
-        <p class="center-meta">NIH NHLBI · U01 HL131003 · Coordinating Center · since 2016</p>
+        <p class="center-meta">NIH NHLBI · U01 HL131003, U01 HL184167 · Coordinating Center · my role since 2016</p>
         <p>
           B2B CHANGE is the next phase of the NIH Bench to Bassinet program and the successor to the
           Pediatric Cardiac Genomics Consortium. Its emphasis shifts from enrollment and genetic
@@ -490,7 +519,7 @@
           <h3><a href="https://www.lungmap.net/" rel="noopener noreferrer" target="_blank">LungMAP</a></h3>
           <span class="center-full">Molecular Atlas of Lung Development Program</span>
         </div>
-        <p class="center-meta">NIH NHLBI · U24 HL148865 · Data Coordination Center · since 2019</p>
+        <p class="center-meta">NIH NHLBI · U24 HL148865 · Data Coordination Center · my role since 2019</p>
         <p>
           LungMAP is an open-access molecular atlas of the developing and diseased lung. The Data
           Coordination Center at Cincinnati Children's makes the atlas interoperable — standardizing
@@ -512,15 +541,16 @@
           <h3><a href="https://www.echinobase.org/" rel="noopener noreferrer" target="_blank">Echinobase</a></h3>
           <span class="center-full">Community genomics research resource for echinoderms</span>
         </div>
-        <p class="center-meta">NIH · P41 HD095831 · Model organism knowledge base · since 2025</p>
+        <p class="center-meta">NIH · P41 HD095831 (University of Florida) · Cincinnati Children's infrastructure site · my role since 2025</p>
         <p>
           Echinobase is the international <a class="gloss" href="https://en.wikipedia.org/wiki/Echinoderm" rel="noopener noreferrer" target="_blank">echinoderm</a> model organism knowledge base and a sister
-          database to <a class="gloss" href="https://www.xenbase.org/xenbase/" rel="noopener noreferrer" target="_blank">Xenbase</a>. The current phase gives the resource a stable long-term home on
-          institutional infrastructure.
+          database to <a class="gloss" href="https://www.xenbase.org/xenbase/" rel="noopener noreferrer" target="_blank">Xenbase</a>. The resource is led from the University of Florida; Cincinnati
+          Children's provides the hosting infrastructure.
         </p>
         <p class="role">
-          <b>My role:</b> establishing the on-premises datacenter resources at Cincinnati Children's
-          to create an online replica of the database and software from the University of Calgary.
+          <b>My role:</b> since 2025, establishing the on-premises datacenter resources at Cincinnati
+          Children's to create an online replica of the database and software from the University of
+          Calgary.
         </p>
       </article>
 
@@ -755,14 +785,14 @@
           <span class="pub-meta">Deleger L, Lingren T, Ni Y, Kaiser M, Stoutenborough L, Marsolo K, <strong>Kouril M</strong>, Molnar K, Solti I. <em>Journal of Biomedical Informatics</em> 50:173–183.</span>
         </li>
         <li>
-          <span class="yr">2012</span>
-          <a class="pub-title" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3540456/" rel="noopener noreferrer" target="_blank">Building gold standard corpora for medical natural language processing tasks</a>
-          <span class="pub-meta">Deleger L, Li Q, Lingren T, Kaiser M, Molnar K, Stoutenborough L, <strong>Kouril M</strong>, Marsolo K, Solti I. <em>AMIA Annual Symposium Proceedings</em> 2012:144–153.</span>
-        </li>
-        <li>
           <span class="yr">2014</span>
           <a class="pub-title" href="https://doi.org/10.4338/ACI-2013-08-RA-0057" rel="noopener noreferrer" target="_blank">Analysis of electronic medication orders with large overdoses</a>
           <span class="pub-meta">Kirkendall ES, <strong>Kouril M</strong>, Minich T, Spooner SA. <em>Applied Clinical Informatics</em> 5(1):25–45.</span>
+        </li>
+        <li>
+          <span class="yr">2012</span>
+          <a class="pub-title" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3540456/" rel="noopener noreferrer" target="_blank">Building gold standard corpora for medical natural language processing tasks</a>
+          <span class="pub-meta">Deleger L, Li Q, Lingren T, Kaiser M, Molnar K, Stoutenborough L, <strong>Kouril M</strong>, Marsolo K, Solti I. <em>AMIA Annual Symposium Proceedings</em> 2012:144–153.</span>
         </li>
       </ol>
     </div>
@@ -771,19 +801,19 @@
       <h3>Book Chapters</h3>
       <ol class="pubs">
         <li>
-          <span class="yr">2016</span>
-          <span class="pub-title">Data storage and access management</span>
-          <span class="pub-meta"><strong>Kouril M</strong>, Wagner M. In: Hutton JJ, ed. <em>Pediatric Biomedical Informatics: Computer Applications in Pediatric Research</em>, 2nd ed. Springer.</span>
+          <span class="yr">2019</span>
+          <a class="pub-title" href="https://doi.org/10.4324/9781351137713-9" rel="noopener noreferrer" target="_blank">Tools and methods for measuring implicit consumer cognition</a>
+          <span class="pub-meta">Pogacar R, Carpenter TP, Shenk CE, <strong>Kouril M</strong>. In: Kardes, Herr &amp; Schwarz, eds. <em>Handbook of Research Methods in Consumer Psychology</em>. Routledge. 160–181.</span>
         </li>
         <li>
           <span class="yr">2016</span>
-          <span class="pub-title">Institutional cybersecurity in a clinical research setting</span>
-          <span class="pub-meta"><strong>Kouril M</strong>, Zimmerly J. In: Hutton JJ, ed. <em>Pediatric Biomedical Informatics: Computer Applications in Pediatric Research</em>, 2nd ed. Springer.</span>
+          <a class="pub-title" href="https://doi.org/10.1007/978-981-10-1104-7_4" rel="noopener noreferrer" target="_blank">Data storage and access management</a>
+          <span class="pub-meta"><strong>Kouril M</strong>, Wagner M. In: Hutton JJ, ed. <em>Pediatric Biomedical Informatics: Computer Applications in Pediatric Research</em>, 2nd ed. Springer. 57–77.</span>
         </li>
         <li>
-          <span class="yr">2018</span>
-          <span class="pub-title">Implicit tools and methods for measuring consumer cognition</span>
-          <span class="pub-meta">Pogacar R, Carpenter TP, Shenk CE, <strong>Kouril M</strong>. In: Kardes, Herr &amp; Schwarz, eds. <em>Handbook of Research Methods in Consumer Psychology</em>. Routledge.</span>
+          <span class="yr">2016</span>
+          <a class="pub-title" href="https://doi.org/10.1007/978-981-10-1104-7_5" rel="noopener noreferrer" target="_blank">Institutional cybersecurity in a clinical research setting</a>
+          <span class="pub-meta"><strong>Kouril M</strong>, Zimmerly J. In: Hutton JJ, ed. <em>Pediatric Biomedical Informatics: Computer Applications in Pediatric Research</em>, 2nd ed. Springer. 79–100.</span>
         </li>
       </ol>
     </div>
@@ -792,9 +822,9 @@
       <h3>High-Performance Computing &amp; Combinatorics</h3>
       <ol class="pubs">
         <li>
-          <span class="yr">2015</span>
-          <span class="pub-title">Leveraging FPGA clusters for SAT computations</span>
-          <span class="pub-meta"><strong>Kouril M</strong>. <em>Parallel Computing: On the Road to Exascale (ParCo 2015)</em>, 525–532.</span>
+          <span class="yr">2016</span>
+          <a class="pub-title" href="https://doi.org/10.3233/978-1-61499-621-7-525" rel="noopener noreferrer" target="_blank">Leveraging FPGA clusters for SAT computations</a>
+          <span class="pub-meta"><strong>Kouril M</strong>. <em>Parallel Computing: On the Road to Exascale (ParCo 2015)</em>. Advances in Parallel Computing 27:525–532.</span>
         </li>
         <li>
           <span class="yr">2012</span>
@@ -844,7 +874,7 @@
       </a>
       <a class="project" href="https://github.com/michalkouril" rel="noopener noreferrer" target="_blank">
         <h3>GitHub</h3>
-        <p>Fifty public repositories: Linux kernel hwmon drivers, FPGA and instrumentation tooling, Docker infrastructure, R/Shiny work, and assorted contributions.</p>
+        <p>Fifty-odd public repositories: Linux kernel hwmon drivers, FPGA and instrumentation tooling, Docker infrastructure, R/Shiny work, and assorted contributions.</p>
         <span class="tag">C · Python · R · PHP</span>
       </a>
     </div>
@@ -873,7 +903,7 @@
       </div>
       <div>
         <dt>Honors</dt>
-        <dd>Service Award, Cincinnati Children's Research Foundation<br>Ohio Board of Regents Fellowship (2004–2006)<br>University of Cincinnati Graduate Scholarship (1999–2006)</dd>
+        <dd>Service Award, Cincinnati Children's Research Foundation (2017)<br>Ohio Board of Regents Fellowship (2004–2006)<br>University of Cincinnati Graduate Scholarship (1999–2006)</dd>
       </div>
       <div>
         <dt>Education</dt>
@@ -944,25 +974,46 @@
   if (!btn) return;
   btn.hidden = false;
 
-  // What the reader is actually seeing right now: their explicit choice if
-  // they made one, otherwise whatever the operating system asks for.
+  // Three settings, cycled in this order. "System" is the default and is
+  // stored as the absence of a key, so a reader can always get back to
+  // following their operating system.
+  var ORDER = ["system", "light", "dark"];
+  var LABEL = { system: "System", light: "Light", dark: "Dark" };
+
+  function setting() {
+    try {
+      var t = localStorage.getItem("theme");
+      if (t === "light" || t === "dark") return t;
+    } catch (e) {}
+    return "system";
+  }
+
+  // What the reader is actually seeing right now.
   function effective() {
-    return root.getAttribute("data-theme") || (mq.matches ? "dark" : "light");
+    var s = setting();
+    return s === "system" ? (mq.matches ? "dark" : "light") : s;
+  }
+
+  function apply(s) {
+    if (s === "system") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme", s);
+    try {
+      if (s === "system") localStorage.removeItem("theme");
+      else localStorage.setItem("theme", s);
+    } catch (e) {}
   }
 
   function sync() {
-    var now  = effective();
-    var next = now === "dark" ? "light" : "dark";
-    btn.dataset.effective = now;                       // swaps the icon
-    btn.querySelector(".label").textContent = next === "dark" ? "Dark" : "Light";
-    btn.setAttribute("aria-label", "Switch to " + next + " theme");
-    btn.title = "Switch to " + next + " theme";
+    var now  = setting();
+    var next = ORDER[(ORDER.indexOf(now) + 1) % ORDER.length];
+    btn.dataset.effective = effective();               // swaps the icon
+    btn.querySelector(".label").textContent = LABEL[now];
+    btn.setAttribute("aria-label", "Theme: " + LABEL[now] + ". Switch to " + LABEL[next] + ".");
+    btn.title = "Theme: " + LABEL[now] + " — click for " + LABEL[next];
   }
 
   btn.addEventListener("click", function () {
-    var next = effective() === "dark" ? "light" : "dark";
-    root.setAttribute("data-theme", next);
-    try { localStorage.setItem("theme", next); } catch (e) {}
+    apply(ORDER[(ORDER.indexOf(setting()) + 1) % ORDER.length]);
     sync();
   });
 
