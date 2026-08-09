@@ -10,3 +10,4 @@
 
 # To publish one of these deliberately, force it: git add -f <file>
 
+*.review.md
