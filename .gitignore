@@ -3,5 +3,10 @@
 # drafts out of git until they are reviewed and intentionally published.
 *.docx
 *.doc
+*.pdf
 *Biosketch*
+*bio_nih*
 *CV*
+
+# To publish one of these deliberately, force it: git add -f <file>
+
