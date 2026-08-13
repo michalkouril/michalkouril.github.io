@@ -48,7 +48,40 @@ def find_links(paths):
     return links
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+_no_redirect = urllib.request.build_opener(_NoRedirect)
+
+
+def check_doi(url):
+    """A DOI is good if doi.org resolves it, whatever the publisher then does.
+
+    Publishers block robots constantly -- Taylor & Francis alone has answered
+    403, 404 and 503 for the same valid DOI. Following through to them tells us
+    nothing about the link, so stop at the redirect.
+    """
+    req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": UA})
+    try:
+        with _no_redirect.open(req, timeout=TIMEOUT) as r:
+            return url, r.status, ""
+    except urllib.error.HTTPError as e:
+        if 300 <= e.code < 400:
+            return url, e.code, "DOI resolves"
+        return url, e.code, e.reason or ""
+    except Exception as e:
+        reason = getattr(e, "reason", e)
+        if isinstance(reason, (TimeoutError, socket.timeout)):
+            return url, TIMEOUT_STATUS, "no response in %ds" % TIMEOUT
+        return url, 0, type(e).__name__
+
+
 def check(url, _attempt=1):
+    if url.startswith(("https://doi.org/", "http://doi.org/", "https://dx.doi.org/")):
+        return check_doi(url)
+
     """Return (url, status, note). status is an int, or 0 if unreachable.
 
     Server errors and connection failures get one retry, so that a flaky
