@@ -14,8 +14,8 @@
   gtag('config', 'G-EXQ239F3QH');
 </script>
 
-<title>Michal Kouril, PhD — Biomedical Informatics &amp; Data Coordination</title>
-<meta name="description" content="Associate Professor of Biomedical Informatics at Cincinnati Children's. Leads informatics for the NIH data coordinating centers RDCRN, B2B CHANGE and LungMAP.">
+<title>Michal Kouril, PhD — Biomedical Informatics, Data Coordination</title>
+<meta name="description" content="Associate Professor of Biomedical Informatics at Cincinnati Children's, leading informatics for the NIH data centers RDCRN, B2B CHANGE and LungMAP.">
 <meta name="author" content="Michal Kouril">
 <link rel="canonical" href="https://www.michalkouril.com/">
 
@@ -35,6 +35,7 @@
 <!-- Apply a saved theme choice before first paint, so switching does not flash. -->
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 
+<link rel="apple-touch-icon" href="portrait.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='20'%20fill='%230d9488'/%3E%3Ctext%20x='50'%20y='71'%20font-size='58'%20font-family='Georgia,serif'%20font-weight='700'%20fill='white'%20text-anchor='middle'%3EMK%3C/text%3E%3C/svg%3E">
 
 <style>
@@ -163,6 +164,7 @@
     font-family:var(--serif);font-size:clamp(2.1rem,5.5vw,3rem);line-height:1.12;
     margin:0 0 .5rem;letter-spacing:-.015em;font-weight:700;
   }
+  h1 .suffix{font-size:.42em;color:var(--ink-3);font-weight:400;letter-spacing:0}
   .roles{margin:0 0 1.1rem;color:var(--ink-2);font-size:1.02rem}
   .roles span{display:block}
   .roles span + span{margin-top:.15rem}
@@ -266,7 +268,7 @@
   a.pub-title:hover{color:var(--accent);text-decoration:underline}
   .pub-meta{display:block;font-size:.875rem;color:var(--ink-3);margin-top:.2rem}
   .pub-meta em{font-style:italic;color:var(--ink-2)}
-  .pub-meta strong{color:var(--ink);font-weight:600}
+  .pub-meta .me{color:var(--ink);font-weight:600}
   .more{margin-top:1.75rem;font-size:.925rem;color:var(--ink-3)}
 
   /* ---------- projects ---------- */
@@ -292,7 +294,8 @@
      Drawn as a masked shape rather than generated text, so screen readers
      never announce it. Scoped to #software: the Projects cards below are
      mostly internal pages and must not claim otherwise. */
-  #software .project h3::after{
+  #software .project h3::after,
+  #projects .project h3:has(a[target="_blank"])::after{
     content:"";flex:none;width:.68rem;height:.68rem;opacity:.4;
     background:currentColor;
     -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2.5'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M7%2017%2017%207M7%207h10v10'/%3E%3C/svg%3E");
@@ -301,7 +304,8 @@
     -webkit-mask-position:center;mask-position:center;
     -webkit-mask-size:contain;mask-size:contain;
   }
-  #software .project:hover h3::after{opacity:1}
+  #software .project:hover h3::after,
+  #projects .project:hover h3:has(a[target="_blank"])::after{opacity:1}
 
   .tag{
     display:inline-block;margin-top:auto;
@@ -371,7 +375,7 @@
       <img class="portrait" src="portrait.jpg" width="512" height="512"
            alt="Michal Kouril" fetchpriority="high">
       <div>
-        <h1>Michal Kouril</h1>
+        <h1>Michal Kouril<span class="suffix">, PhD</span></h1>
         <p class="roles">
           <span>Associate Professor, Division of Biomedical Informatics — Cincinnati Children's</span>
           <span>Research Associate Professor of Pediatrics — University of Cincinnati College of Medicine</span>
@@ -424,7 +428,7 @@
         of Cincinnati in 2006 under Prof. Jerome L. Paul.
       </p>
       <p>
-        My primary focus is <strong>leading informatics for large, NIH-funded data management and
+        My primary focus is leading informatics for large, NIH-funded <strong>data management and
         coordinating centers</strong>. These centers are the connective tissue of multi-site
         research: a single consortium may span dozens of clinical sites, thousands of participants,
         and years of longitudinal follow-up, and none of it becomes usable science without a
@@ -680,82 +684,82 @@
         <li>
           <span class="yr">2026</span>
           <a class="pub-title" href="https://doi.org/10.1371/journal.pone.0342742" rel="noopener noreferrer" target="_blank">Implicit association tests for all: Using iatgen for non-English and offline samples</a>
-          <span class="pub-meta">Santos JO, Do Bú E, Hara T, Mendonça C, Hagá S, Pogacar R, <strong>Kouril M</strong>. <em>PLOS ONE</em> 21(4):e0342742.</span>
+          <span class="pub-meta">Santos JO, Do Bú E, Hara T, Mendonça C, Hagá S, Pogacar R, <span class="me">Kouril M</span>. <em>PLOS ONE</em> 21(4):e0342742.</span>
         </li>
         <li>
           <span class="yr">2025</span>
           <a class="pub-title" href="https://doi.org/10.1093/jamiaopen/ooaf135" rel="noopener noreferrer" target="_blank">Engaging end-users to develop a novel algorithm to process electronic medication adherence monitoring device data</a>
-          <span class="pub-meta">McGrady ME, Hommel KA, Mara CA, Breen G, <strong>Kouril M</strong>. <em>JAMIA Open</em> 8(5):ooaf135.</span>
+          <span class="pub-meta">McGrady ME, Hommel KA, Mara CA, Breen G, <span class="me">Kouril M</span>. <em>JAMIA Open</em> 8(5):ooaf135.</span>
         </li>
         <li>
           <span class="yr">2025</span>
           <a class="pub-title" href="https://doi.org/10.1016/j.mcpro.2025.100947" rel="noopener noreferrer" target="_blank">Comprehensive proteomics metadata and integrative web portals facilitate sharing and integration of LINCS multiomics data</a>
-          <span class="pub-meta">Vidović D, Shamsaei B, Schürer SC, Kogan P, Chojnacki S, <strong>Kouril M</strong>, et&nbsp;al. <em>Molecular &amp; Cellular Proteomics</em> 24(7).</span>
+          <span class="pub-meta">Vidović D, Shamsaei B, Schürer SC, Kogan P, Chojnacki S, <span class="me">Kouril M</span>, et&nbsp;al. <em>Molecular &amp; Cellular Proteomics</em> 24(7).</span>
         </li>
         <li>
           <span class="yr">2024</span>
           <a class="pub-title" href="https://doi.org/10.1165/rcmb.2022-0165OC" rel="noopener noreferrer" target="_blank">LungMAP portal ecosystem: systems-level exploration of the lung</a>
-          <span class="pub-meta">Gaddis N, Fortriede J, Guo M, Bardes EE, <strong>Kouril M</strong>, et&nbsp;al. <em>American Journal of Respiratory Cell and Molecular Biology</em> 70(2):129–139.</span>
+          <span class="pub-meta">Gaddis N, Fortriede J, Guo M, Bardes EE, <span class="me">Kouril M</span>, et&nbsp;al. <em>American Journal of Respiratory Cell and Molecular Biology</em> 70(2):129–139.</span>
         </li>
         <li>
           <span class="yr">2024</span>
           <a class="pub-title" href="https://doi.org/10.1126/sciadv.adj3010" rel="noopener noreferrer" target="_blank">Accelerating drug discovery and repurposing by combining transcriptional signature connectivity with docking</a>
-          <span class="pub-meta">Thorman AW, Reigle J, Chutipongtanate S, Yang J, Shamsaei B, Pilarczyk M, Fazel-Najafabadi M, Adamczak R, <strong>Kouril M</strong>, et&nbsp;al. <em>Science Advances</em> 10(35).</span>
+          <span class="pub-meta">Thorman AW, Reigle J, Chutipongtanate S, Yang J, Shamsaei B, Pilarczyk M, Fazel-Najafabadi M, Adamczak R, <span class="me">Kouril M</span>, et&nbsp;al. <em>Science Advances</em> 10(35).</span>
         </li>
         <li>
           <span class="yr">2024</span>
           <a class="pub-title" href="https://doi.org/10.1038/s41590-024-01782-4" rel="noopener noreferrer" target="_blank">An immunophenotype-coupled transcriptomic atlas of human hematopoietic progenitors</a>
-          <span class="pub-meta">Zhang X, Song B, Carlino MJ, &hellip; <strong>Kouril M</strong>, et&nbsp;al. <em>Nature Immunology</em> 25(4).</span>
+          <span class="pub-meta">Zhang X, Song B, Carlino MJ, &hellip; <span class="me">Kouril M</span>, et&nbsp;al. <em>Nature Immunology</em> 25(4).</span>
         </li>
         <li>
           <span class="yr">2023</span>
           <a class="pub-title" href="https://doi.org/10.1038/s41467-023-40173-5" rel="noopener noreferrer" target="_blank">Guided construction of single cell reference for human and mouse lung</a>
-          <span class="pub-meta">Guo M, Morley MP, Jiang C, &hellip; <strong>Kouril M</strong>, et&nbsp;al. <em>Nature Communications</em> 14:4566.</span>
+          <span class="pub-meta">Guo M, Morley MP, Jiang C, &hellip; <span class="me">Kouril M</span>, et&nbsp;al. <em>Nature Communications</em> 14:4566.</span>
         </li>
         <li>
           <span class="yr">2023</span>
           <a class="pub-title" href="https://doi.org/10.3389/fcomp.2023.1183380" rel="noopener noreferrer" target="_blank">An application programming interface implementing Bayesian approaches for evaluating effect of time-varying treatment with R and Python</a>
-          <span class="pub-meta">Chen C, Huang B, <strong>Kouril M</strong>, Liu J, Kim H, Sivaganisan S, Welge JA, DelBello MP. <em>Frontiers in Computer Science</em> 5.</span>
+          <span class="pub-meta">Chen C, Huang B, <span class="me">Kouril M</span>, Liu J, Kim H, Sivaganisan S, Welge JA, DelBello MP. <em>Frontiers in Computer Science</em> 5.</span>
         </li>
         <li>
           <span class="yr">2022</span>
           <a class="pub-title" href="https://doi.org/10.1038/s41467-022-32205-3" rel="noopener noreferrer" target="_blank">Connecting omics signatures and revealing biological mechanisms with iLINCS</a>
-          <span class="pub-meta">Pilarczyk M, Fazel-Najafabadi M, <strong>Kouril M</strong>, Shamsaei B, et&nbsp;al. <em>Nature Communications</em> 13:4678.</span>
+          <span class="pub-meta">Pilarczyk M, Fazel-Najafabadi M, <span class="me">Kouril M</span>, Shamsaei B, et&nbsp;al. <em>Nature Communications</em> 13:4678.</span>
         </li>
         <li>
           <span class="yr">2021</span>
           <a class="pub-title" href="https://doi.org/10.1038/s41562-021-01187-5" rel="noopener noreferrer" target="_blank">An observational study of Internet behaviours for adolescent females following sexual abuse</a>
-          <span class="pub-meta">Noll JG, Haag AC, Shenk CE, Wright MF, Barnes JE, Kohram M, Malgaroli M, Foley DJ, <strong>Kouril M</strong>, Bonanno GA. <em>Nature Human Behaviour</em> 6:74–87.</span>
+          <span class="pub-meta">Noll JG, Haag AC, Shenk CE, Wright MF, Barnes JE, Kohram M, Malgaroli M, Foley DJ, <span class="me">Kouril M</span>, Bonanno GA. <em>Nature Human Behaviour</em> 6:74–87.</span>
         </li>
         <li>
           <span class="yr">2020</span>
           <a class="pub-title" href="https://doi.org/10.1093/nar/gkaa436" rel="noopener noreferrer" target="_blank">piNET: a versatile web platform for downstream analysis and visualization of proteomics data</a>
-          <span class="pub-meta">Shamsaei B, Chojnacki S, Pilarczyk M, Najafabadi M, &hellip; <strong>Kouril M</strong>, Medvedovic M, Meller J. <em>Nucleic Acids Research</em> 48(W1):W85–W93.</span>
+          <span class="pub-meta">Shamsaei B, Chojnacki S, Pilarczyk M, Najafabadi M, &hellip; <span class="me">Kouril M</span>, Medvedovic M, Meller J. <em>Nucleic Acids Research</em> 48(W1):W85–W93.</span>
         </li>
         <li>
           <span class="yr">2020</span>
           <a class="pub-title" href="https://doi.org/10.1093/jamia/ocaa071" rel="noopener noreferrer" target="_blank">An interactive online dashboard for tracking COVID-19 in U.S. counties, cities, and states in real time</a>
-          <span class="pub-meta">Wissel BD, Van Camp PJ, <strong>Kouril M</strong>, Weis C, Glauser TA, White PS, Kohane IS, Dexheimer JW. <em>JAMIA</em> 27(7):1121–1125.</span>
+          <span class="pub-meta">Wissel BD, Van Camp PJ, <span class="me">Kouril M</span>, Weis C, Glauser TA, White PS, Kohane IS, Dexheimer JW. <em>JAMIA</em> 27(7):1121–1125.</span>
         </li>
         <li>
           <span class="yr">2019</span>
           <a class="pub-title" href="https://doi.org/10.1038/s41598-019-43935-8" rel="noopener noreferrer" target="_blank">GREIN: an interactive web platform for re-analyzing GEO RNA-seq data</a>
-          <span class="pub-meta">Mahi NA, Najafabadi MF, Pilarczyk M, <strong>Kouril M</strong>, Medvedovic M. <em>Scientific Reports</em> 9:7580.</span>
+          <span class="pub-meta">Mahi NA, Najafabadi MF, Pilarczyk M, <span class="me">Kouril M</span>, Medvedovic M. <em>Scientific Reports</em> 9:7580.</span>
         </li>
         <li>
           <span class="yr">2019</span>
           <a class="pub-title" href="https://doi.org/10.3758/s13428-019-01293-3" rel="noopener noreferrer" target="_blank">Survey-software implicit association tests: a methodological and empirical analysis</a>
-          <span class="pub-meta">Carpenter TP, Pogacar R, Pullig C, <strong>Kouril M</strong>, et&nbsp;al. <em>Behavior Research Methods</em> 51:2194–2208.</span>
+          <span class="pub-meta">Carpenter TP, Pogacar R, Pullig C, <span class="me">Kouril M</span>, et&nbsp;al. <em>Behavior Research Methods</em> 51:2194–2208.</span>
         </li>
         <li>
           <span class="yr">2018</span>
           <a class="pub-title" href="https://doi.org/10.1016/j.cels.2017.11.001" rel="noopener noreferrer" target="_blank">The Library of Integrated Network-Based Cellular Signatures NIH program: system-level cataloging of human cells response to perturbations</a>
-          <span class="pub-meta">Keenan AB, Jenkins SL, Jagodnik KM, &hellip; <strong>Kouril M</strong>, et&nbsp;al. <em>Cell Systems</em> 6(1):13–24.</span>
+          <span class="pub-meta">Keenan AB, Jenkins SL, Jagodnik KM, &hellip; <span class="me">Kouril M</span>, et&nbsp;al. <em>Cell Systems</em> 6(1):13–24.</span>
         </li>
         <li>
           <span class="yr">2017</span>
           <a class="pub-title" href="https://doi.org/10.1186/s12885-017-3689-3" rel="noopener noreferrer" target="_blank">GRcalculator: an online tool for calculating and mining dose–response data</a>
-          <span class="pub-meta">Clark NA, Hafner M, <strong>Kouril M</strong>, Williams EH, Muhlich JL, Pilarczyk M, Niepel M, Sorger PK, Medvedovic M. <em>BMC Cancer</em> 17:698.</span>
+          <span class="pub-meta">Clark NA, Hafner M, <span class="me">Kouril M</span>, Williams EH, Muhlich JL, Pilarczyk M, Niepel M, Sorger PK, Medvedovic M. <em>BMC Cancer</em> 17:698.</span>
         </li>
       </ol>
     </div>
@@ -766,37 +770,37 @@
         <li>
           <span class="yr">2024</span>
           <a class="pub-title" href="https://doi.org/10.3389/fped.2024.1457538" rel="noopener noreferrer" target="_blank">Digital health technology to support patient-centered shared decision making at point of care for juvenile idiopathic arthritis</a>
-          <span class="pub-meta">Huang B, <strong>Kouril M</strong>, Chen C, Daraiseh NM, Ferraro K, et&nbsp;al. <em>Frontiers in Pediatrics</em> 12:1457538.</span>
+          <span class="pub-meta">Huang B, <span class="me">Kouril M</span>, Chen C, Daraiseh NM, Ferraro K, et&nbsp;al. <em>Frontiers in Pediatrics</em> 12:1457538.</span>
         </li>
         <li>
           <span class="yr">2017</span>
           <a class="pub-title" href="https://doi.org/10.1001/jamapediatrics.2016.3865" rel="noopener noreferrer" target="_blank">Assessing frequency and risk of weight entry errors in pediatrics</a>
-          <span class="pub-meta">Hagedorn PA, Kirkendall ES, <strong>Kouril M</strong>, Dexheimer JW, Courter J, Minich T, Spooner SA. <em>JAMA Pediatrics</em> 171(4):390–392.</span>
+          <span class="pub-meta">Hagedorn PA, Kirkendall ES, <span class="me">Kouril M</span>, Dexheimer JW, Courter J, Minich T, Spooner SA. <em>JAMA Pediatrics</em> 171(4):390–392.</span>
         </li>
         <li>
           <span class="yr">2017</span>
           <a class="pub-title" href="https://doi.org/10.4338/ACI-2016-10-RA-0168" rel="noopener noreferrer" target="_blank">The effects of medication alerts on prescriber response in a pediatric hospital</a>
-          <span class="pub-meta">Dexheimer JW, Kirkendall ES, <strong>Kouril M</strong>, Hagedorn PA, Minich T, Duan LL, Mahdi M, Szczesniak R, Spooner SA. <em>Applied Clinical Informatics</em> 8(2):491–501.</span>
+          <span class="pub-meta">Dexheimer JW, Kirkendall ES, <span class="me">Kouril M</span>, Hagedorn PA, Minich T, Duan LL, Mahdi M, Szczesniak R, Spooner SA. <em>Applied Clinical Informatics</em> 8(2):491–501.</span>
         </li>
         <li>
           <span class="yr">2017</span>
           <a class="pub-title" href="https://doi.org/10.1093/jamia/ocw086" rel="noopener noreferrer" target="_blank">Automated identification of antibiotic overdoses and adverse drug events via analysis of prescribing alerts and medication administration records</a>
-          <span class="pub-meta">Kirkendall ES, <strong>Kouril M</strong>, Dexheimer JW, Courter JD, Hagedorn P, Szczesniak R, Li D, Damania R, Minich T, Spooner SA. <em>JAMIA</em> 24(2):295–302.</span>
+          <span class="pub-meta">Kirkendall ES, <span class="me">Kouril M</span>, Dexheimer JW, Courter JD, Hagedorn P, Szczesniak R, Li D, Damania R, Minich T, Spooner SA. <em>JAMIA</em> 24(2):295–302.</span>
         </li>
         <li>
           <span class="yr">2014</span>
           <a class="pub-title" href="https://doi.org/10.1016/j.jbi.2014.01.014" rel="noopener noreferrer" target="_blank">Preparing an annotated gold standard corpus to share with extramural investigators for de-identification research</a>
-          <span class="pub-meta">Deleger L, Lingren T, Ni Y, Kaiser M, Stoutenborough L, Marsolo K, <strong>Kouril M</strong>, Molnar K, Solti I. <em>Journal of Biomedical Informatics</em> 50:173–183.</span>
+          <span class="pub-meta">Deleger L, Lingren T, Ni Y, Kaiser M, Stoutenborough L, Marsolo K, <span class="me">Kouril M</span>, Molnar K, Solti I. <em>Journal of Biomedical Informatics</em> 50:173–183.</span>
         </li>
         <li>
           <span class="yr">2014</span>
           <a class="pub-title" href="https://doi.org/10.4338/ACI-2013-08-RA-0057" rel="noopener noreferrer" target="_blank">Analysis of electronic medication orders with large overdoses</a>
-          <span class="pub-meta">Kirkendall ES, <strong>Kouril M</strong>, Minich T, Spooner SA. <em>Applied Clinical Informatics</em> 5(1):25–45.</span>
+          <span class="pub-meta">Kirkendall ES, <span class="me">Kouril M</span>, Minich T, Spooner SA. <em>Applied Clinical Informatics</em> 5(1):25–45.</span>
         </li>
         <li>
           <span class="yr">2012</span>
           <a class="pub-title" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3540456/" rel="noopener noreferrer" target="_blank">Building gold standard corpora for medical natural language processing tasks</a>
-          <span class="pub-meta">Deleger L, Li Q, Lingren T, Kaiser M, Molnar K, Stoutenborough L, <strong>Kouril M</strong>, Marsolo K, Solti I. <em>AMIA Annual Symposium Proceedings</em> 2012:144–153.</span>
+          <span class="pub-meta">Deleger L, Li Q, Lingren T, Kaiser M, Molnar K, Stoutenborough L, <span class="me">Kouril M</span>, Marsolo K, Solti I. <em>AMIA Annual Symposium Proceedings</em> 2012:144–153.</span>
         </li>
       </ol>
     </div>
@@ -807,17 +811,17 @@
         <li>
           <span class="yr">2019</span>
           <a class="pub-title" href="https://doi.org/10.4324/9781351137713-9" rel="noopener noreferrer" target="_blank">Tools and methods for measuring implicit consumer cognition</a>
-          <span class="pub-meta">Pogacar R, Carpenter TP, Shenk CE, <strong>Kouril M</strong>. In: Kardes, Herr &amp; Schwarz, eds. <em>Handbook of Research Methods in Consumer Psychology</em>. Routledge. 160–181.</span>
+          <span class="pub-meta">Pogacar R, Carpenter TP, Shenk CE, <span class="me">Kouril M</span>. In: Kardes, Herr &amp; Schwarz, eds. <em>Handbook of Research Methods in Consumer Psychology</em>. Routledge. 160–181.</span>
         </li>
         <li>
           <span class="yr">2016</span>
           <a class="pub-title" href="https://doi.org/10.1007/978-981-10-1104-7_4" rel="noopener noreferrer" target="_blank">Data storage and access management</a>
-          <span class="pub-meta"><strong>Kouril M</strong>, Wagner M. In: Hutton JJ, ed. <em>Pediatric Biomedical Informatics: Computer Applications in Pediatric Research</em>, 2nd ed. Springer. 57–77.</span>
+          <span class="pub-meta"><span class="me">Kouril M</span>, Wagner M. In: Hutton JJ, ed. <em>Pediatric Biomedical Informatics: Computer Applications in Pediatric Research</em>, 2nd ed. Springer. 57–77.</span>
         </li>
         <li>
           <span class="yr">2016</span>
           <a class="pub-title" href="https://doi.org/10.1007/978-981-10-1104-7_5" rel="noopener noreferrer" target="_blank">Institutional cybersecurity in a clinical research setting</a>
-          <span class="pub-meta"><strong>Kouril M</strong>, Zimmerly J. In: Hutton JJ, ed. <em>Pediatric Biomedical Informatics: Computer Applications in Pediatric Research</em>, 2nd ed. Springer. 79–100.</span>
+          <span class="pub-meta"><span class="me">Kouril M</span>, Zimmerly J. In: Hutton JJ, ed. <em>Pediatric Biomedical Informatics: Computer Applications in Pediatric Research</em>, 2nd ed. Springer. 79–100.</span>
         </li>
       </ol>
     </div>
@@ -828,22 +832,22 @@
         <li>
           <span class="yr">2016</span>
           <a class="pub-title" href="https://doi.org/10.3233/978-1-61499-621-7-525" rel="noopener noreferrer" target="_blank">Leveraging FPGA clusters for SAT computations</a>
-          <span class="pub-meta"><strong>Kouril M</strong>. <em>Parallel Computing: On the Road to Exascale (ParCo 2015)</em>. Advances in Parallel Computing 27:525–532.</span>
+          <span class="pub-meta"><span class="me">Kouril M</span>. <em>Parallel Computing: On the Road to Exascale (ParCo 2015)</em>. Advances in Parallel Computing 27:525–532.</span>
         </li>
         <li>
           <span class="yr">2012</span>
           <a class="pub-title" href="https://math.colgate.edu/~integers/m46/m46.pdf" rel="noopener noreferrer" target="_blank">Computing the van der Waerden number <em>W</em>(3,&nbsp;4)&nbsp;=&nbsp;293</a>
-          <span class="pub-meta"><strong>Kouril M</strong>. <em>INTEGERS: Electronic Journal of Combinatorial Number Theory</em> 12:A46.</span>
+          <span class="pub-meta"><span class="me">Kouril M</span>. <em>INTEGERS: Electronic Journal of Combinatorial Number Theory</em> 12:A46.</span>
         </li>
         <li>
           <span class="yr">2008</span>
           <a class="pub-title" href="https://doi.org/10.1080/10586458.2008.10129025" rel="noopener noreferrer" target="_blank">The van der Waerden number <em>W</em>(2,&nbsp;6) is 1132</a>
-          <span class="pub-meta"><strong>Kouril M</strong>, Paul JL. <em>Experimental Mathematics</em> 17(1):53–61.</span>
+          <span class="pub-meta"><span class="me">Kouril M</span>, Paul JL. <em>Experimental Mathematics</em> 17(1):53–61.</span>
         </li>
         <li>
           <span class="yr">2006</span>
           <a class="pub-title" href="https://doi.org/10.1145/1121341.1121487" rel="noopener noreferrer" target="_blank">A template library to facilitate teaching message passing parallel computing</a>
-          <span class="pub-meta">Paul JL, <strong>Kouril M</strong>, Berman KA. <em>Proceedings of SIGCSE 2006</em>, 464–468.</span>
+          <span class="pub-meta">Paul JL, <span class="me">Kouril M</span>, Berman KA. <em>Proceedings of SIGCSE 2006</em>, 464–468.</span>
         </li>
       </ol>
     </div>
@@ -898,21 +902,21 @@
       after its vendor moved on.
     </p>
     <div class="projects">
-      <a class="project" href="bloomsky1/">
-        <h3>BloomSky SKY1 Wi-Fi Configurator</h3>
+      <div class="project">
+        <h3><a class="cover" href="bloomsky1/">BloomSky SKY1 Wi-Fi Configurator</a></h3>
         <p>A Python utility that reconfigures the Wi-Fi SSID and password on a BloomSky SKY1 weather station by replaying the encrypted cooee 2.4&nbsp;GHz multicast provisioning protocol.</p>
         <span class="tag">Python · Multicast</span>
-      </a>
-      <a class="project" href="bloomsky2/">
-        <h3>BloomSky SKY2 Wi-Fi Configurator</h3>
+      </div>
+      <div class="project">
+        <h3><a class="cover" href="bloomsky2/">BloomSky SKY2 Wi-Fi Configurator</a></h3>
         <p>A browser-based configurator that talks to a BloomSky SKY2 over Web Bluetooth to read device status and push new Wi-Fi credentials — no app or vendor cloud required.</p>
         <span class="tag">Web Bluetooth · JavaScript</span>
-      </a>
-      <a class="project" href="https://github.com/michalkouril" rel="noopener noreferrer" target="_blank">
-        <h3>GitHub</h3>
+      </div>
+      <div class="project">
+        <h3><a class="cover" href="https://github.com/michalkouril" rel="noopener noreferrer" target="_blank">GitHub</a></h3>
         <p>Fifty-odd public repositories: Linux kernel hwmon drivers, FPGA and instrumentation tooling, Docker infrastructure, R/Shiny work, and assorted contributions.</p>
         <span class="tag">C · Python · R · PHP</span>
-      </a>
+      </div>
     </div>
   </div>
 </section>
