@@ -7,6 +7,27 @@
     <title>BloomSky SKY2 Wi-Fi Configurator — Michal Kouril</title>
     <meta name="description" content="Change the Wi-Fi SSID and password on a BloomSky SKY2 weather station from your browser over Web Bluetooth.">
     <link rel="stylesheet" href="../assets/subpage.css" />
+    <style>
+      input[type="password"]{
+        font:inherit;font-size:.92rem;
+        padding:.4rem .6rem;margin:.2rem .35rem .2rem 0;
+        color:var(--ink);background:var(--bg);
+        border:1px solid var(--rule);border-radius:6px;
+      }
+      input[type="password"]:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+      button:disabled{opacity:.5;cursor:not-allowed}
+      button:disabled:hover{border-color:var(--rule);color:var(--ink)}
+      button.icon{padding:.3rem .45rem;line-height:1}
+      #connection{font-size:.9rem;color:var(--ink-3);white-space:nowrap}
+      #connection::before{content:"\25CF\00a0";color:var(--ink-3)}
+      #connection[data-state="connected"]::before{color:#16a34a}
+      #connection[data-state="connecting"]::before,
+      #connection[data-state="unresponsive"]::before{color:#d97706}
+      .msg{padding:.6rem .8rem;border-radius:6px;border:1px solid var(--rule);background:var(--bg-soft);margin:0 0 1rem}
+      .msg-ok{border-color:#16a34a}
+      .msg-error{border-color:#dc2626}
+      #log{max-height:16rem;overflow-y:auto;white-space:pre-wrap}
+    </style>
   </head>
   <body>
      <div class="sitebar"><a href="../">&larr;&nbsp; Michal Kouril</a></div>
@@ -19,43 +40,44 @@
      If successful the wifi icon will blink <b>alternate</b> colors.<br> If unsuccessful please try again.<br>
      <hr>
     <form>
+       <p id="message" class="msg" role="status" aria-live="polite" hidden></p>
        <label for="name">Device Name (do not change): </label>
        <input id="name" type="text" value="BSKY" placeholder="Device Name"><br>
-       <button id="scan">Connect to SKY2 via Bluetooth</button>
-       <!-- <button id="reconnect">Reconnect</button>
-       <button id="disconnect">Disconnect</button><br> -->
-       <hr> 
+       <button id="scan" type="button">Connect to SKY2 via Bluetooth</button>
+       <button id="reconnect" type="button" hidden>Reconnect</button>
+       <span id="connection" data-state="disconnected">Not connected</span>
+       <hr>
        <label for="deviceid">Device ID: </label>
        <input id="deviceid" type="text" value="" readonly placeholder="Device ID"><br>
        <label for="status">Device Status: </label>
        <input id="status" type="text" size=40 value="" readonly placeholder="Status">
-       <svg xmlns="http://www.w3.org/2000/svg" id="getStatus" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" style="vertical-align: middle;" viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-          <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-       </svg>
+       <button id="getStatus" type="button" class="icon" aria-label="Refresh status" title="Refresh status">
+         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" style="vertical-align: middle;" viewBox="0 0 16 16" aria-hidden="true">
+            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+         </svg>
+       </button>
        <br>
        <hr>
-       <input id="wifi_ssid" type="text" autofocus="" placeholder="Your WIFI SSID"><br>
-       <input id="wifi_pass" type="text" value="" placeholder="Your WIFI Password"><br>
-       <button id="updatewifi">Update WIFI</button>
-       <button id="reboot">Reboot</button><br> 
+       <input id="wifi_ssid" type="text" autofocus="" autocomplete="off" placeholder="Your WIFI SSID" aria-label="Wi-Fi SSID"><br>
+       <input id="wifi_pass" type="password" value="" autocomplete="off" placeholder="Your WIFI Password" aria-label="Wi-Fi password">
+       <label><input id="show_pass" type="checkbox"> Show</label><br>
+       <button id="updatewifi" type="button">Update WIFI</button>
+       <button id="reboot" type="button">Reboot</button><br>
        <hr>
-       Note: After you update WIFI wait until the status changes (by clicking on the refresh icon) to:<br>
+       Note: After you update WIFI the status refreshes automatically every 2 seconds. It should change to:<br>
        1: Wait -- keep waiting -- if more than 30s something else went wrong<br>
        3: Good -- you are connected and pinging gateway -- you can't change them without hard resetting again. you can now reboot.<br>
        4: Not Good -- issues with writing ssid/pass -- check your/my code.<br>
        5: Not Good -- couldn't connect wifi -- try again -- most likely a reboot needed.<br>
        <br>
        <b>For browsers with Bluetooth API support only e.g. Chrome.</b><br><br>
-       <!--
-       <hr>
-       <button id="getDetails">Get device details</button>
-       <button id="getTest">Test</button>
-       <button id="getTestSend">Test Send</button><br> 
-       -->
     </form>
 
-    <div id="details"></div>
+    <details>
+      <summary>Log</summary>
+      <pre id="log"></pre>
+    </details>
 
     <footer class="sitefoot">
       Have a SKY1 instead? Use the <a href="../bloomsky1/">cooee configurator</a>.
