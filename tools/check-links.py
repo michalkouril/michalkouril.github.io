@@ -6,7 +6,8 @@
     python3 tools/check-links.py --report broken.md   # also list broken links
                                                       # as Markdown (CI uses it)
 
-Exit status is 0 when nothing is broken, 1 when something is. Links that are
+Exit status is 0 when nothing is broken, 1 when something is, and 2 when no
+link resolved at all (this machine looks offline, so nothing was checked). Links that are
 merely refusing robots (publishers, LinkedIn) are reported but do not fail the
 run -- they are reachable in a browser, and failing on them would train you to
 ignore this check.
@@ -159,7 +160,7 @@ def main(argv):
               f"Skipping the check.{C['off']}")
         if report:
             write_report(report, [])
-        return 0
+        return 2
 
     broken, blocked, slow = [], [], []
     for url, status, note in results:

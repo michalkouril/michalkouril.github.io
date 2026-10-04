@@ -21,6 +21,11 @@ permissions:
   contents: read
   issues: write
 
+# A push and the weekly run landing together must not both open an issue.
+concurrency:
+  group: check-links-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   links:
     runs-on: ubuntu-latest
@@ -36,23 +41,43 @@ jobs:
         run: |
           set +e
           python3 tools/check-links.py --report broken.md
-          echo "status=$?" >> "$GITHUB_OUTPUT"
-          if [ -s broken.md ]; then
-            echo "::warning title=Broken links::$(wc -l < broken.md) dead link(s) on the site -- see the job summary"
-            { echo "## Broken links"; echo; cat broken.md; } >> "$GITHUB_STEP_SUMMARY"
-          fi
+          status=$?
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          # 0 = all alive, 1 = dead links (listed in broken.md),
+          # 2 = runner offline, nothing checked. Anything else -- or a 1 with
+          # no report, which is what a Python traceback looks like -- means
+          # the checker itself broke, and that should turn the run red.
+          case "$status" in
+            0) ;;
+            1) if [ ! -s broken.md ]; then
+                 echo "::error title=Link checker failed::exited 1 without writing a report"
+                 exit 1
+               fi
+               echo "::warning title=Broken links::$(wc -l < broken.md) dead link(s) on the site -- see the job summary"
+               { echo "## Broken links"; echo; cat broken.md; } >> "$GITHUB_STEP_SUMMARY" ;;
+            2) echo "::warning title=Links not checked::no link resolved -- the runner looks offline" ;;
+            *) echo "::error title=Link checker failed::exit status $status"
+               exit 1 ;;
+          esac
           exit 0
 
       - name: Remind about broken links
-        if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+        # Only on master, and only when the check actually ran (not offline).
+        if: >-
+          github.ref == 'refs/heads/master' && github.event_name != 'pull_request' &&
+          (steps.check.outputs.status == '0' || steps.check.outputs.status == '1')
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          STATUS: ${{ steps.check.outputs.status }}
           TITLE: Broken links on michalkouril.com
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          issue=$(gh issue list --state open --search "in:title \"$TITLE\"" \
-                    --json number --jq '.[0].number // empty')
-          if [ -s broken.md ]; then
+          # Exact title match: issue search is fuzzy and can lag behind.
+          issue=$(gh issue list --state open --limit 200 --json number,title \
+                    --jq '[.[] | select(.title == env.TITLE)][0].number // empty')
+          if [ "$STATUS" = 1 ]; then
             {
               echo "The link check found dead links. The site still deployed;"
               echo "fix or remove these when you get a chance."
@@ -61,13 +86,15 @@ jobs:
               echo
               echo "Last checked: $(date -u '+%Y-%m-%d %H:%M UTC') -- [run]($RUN_URL)"
             } > body.md
-            if [ -n "$issue" ]; then
-              gh issue edit "$issue" --body-file body.md
-              gh issue comment "$issue" --body "Still broken as of $(date -u '+%Y-%m-%d'). [Run]($RUN_URL)"
+            if [ -z "$issue" ]; then
+              gh issue create --title "$TITLE" --body-file body.md --assignee "$OWNER"
             else
-              gh issue create --title "$TITLE" --body-file body.md \
-                --assignee "${{ github.repository_owner }}"
+              gh issue edit "$issue" --body-file body.md
+              # One nudge a week, not one per push.
+              if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+                gh issue comment "$issue" --body "Still broken as of $(date -u '+%Y-%m-%d'). [Run]($RUN_URL)"
+              fi
             fi
-          elif [ -n "$issue" ] && [ "${{ steps.check.outputs.status }}" = 0 ]; then
+          elif [ -n "$issue" ]; then
             gh issue close "$issue" --comment "All links alive again. [Run]($RUN_URL)"
           fi

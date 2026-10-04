@@ -13,7 +13,9 @@ if ! git diff --cached --name-only --diff-filter=ACM | grep -q '\.html$'; then
 fi
 
 echo "pre-commit: checking outgoing links..."
-if python3 tools/check-links.py; then
+python3 tools/check-links.py
+# 0 = all alive, 2 = offline (nothing checked); only 1 means a dead link.
+if [ $? -ne 1 ]; then
     exit 0
 fi
 
