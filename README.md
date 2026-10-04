@@ -41,3 +41,19 @@ deploys regardless. Dead links show as a warning on the run, and on `master` the
 opens a **Broken links on michalkouril.com** issue assigned to you, refreshes it on every
 run and comments on it each week while links stay broken. The issue closes itself once
 every link is alive again. The run only goes red if the checker itself crashes.
+
+## Scholar stats
+
+The citations, h-index and i10-index in the page header come from
+[Google Scholar](https://scholar.google.com/citations?user=duTVse8AAAAJ). Refresh them by hand with:
+
+```sh
+python3 tools/update-stats.py --dry-run   # show what would change
+python3 tools/update-stats.py             # rewrite index.html
+```
+
+`.github/workflows/update-stats.yml` runs the same script every Monday (and on demand from
+the Actions tab) and commits to `master` when the numbers or the month change. Scholar
+sometimes blocks automated requests; the run then shows a warning, leaves the page as it
+is, and tries again the next week. It also refuses numbers that went down, since that
+means the scrape picked up the wrong thing.

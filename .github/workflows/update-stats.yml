@@ -1,0 +1,55 @@
+name: Update Scholar stats
+
+# Weekly, and on demand from the Actions tab: refresh the citations, h-index,
+# i10-index and "as of" month in the page header from Google Scholar, and
+# commit to master when anything visible changed (at most a date bump a month).
+#
+# Soft, like the link check: Scholar sometimes blocks automated requests, and
+# then the run shows a warning and leaves the page as it is. The next week tries
+# again.
+on:
+  schedule:
+    - cron: '17 14 * * 1'   # Mondays, 14:17 UTC (after the link check)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-stats
+  cancel-in-progress: false
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch Scholar numbers
+        run: |
+          set +e
+          python3 tools/update-stats.py
+          if [ $? -ne 0 ]; then
+            echo "::warning title=Stats not updated::Google Scholar could not be read -- see the log. The page keeps its current numbers."
+          fi
+          exit 0
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No change to commit."
+            exit 0
+          fi
+          git diff -- index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Update Google Scholar stats" -- index.html
+          # master may have moved while this ran.
+          git pull -q --rebase origin master
+          git push origin HEAD:master
