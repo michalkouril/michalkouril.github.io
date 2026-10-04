@@ -2,7 +2,12 @@ name: Check links
 
 # Runs on every push that touches the site, on pull requests, weekly so that
 # link rot gets caught even when nothing changes, and on demand from the
-# Actions tab. Results show as a green check or red X next to each commit.
+# Actions tab.
+#
+# The check is soft: a dead link never turns the run red or holds up the site.
+# Instead the run shows a warning, and on master a "Broken links" issue is
+# opened (or updated) as a reminder -- GitHub emails you about it. The issue
+# closes itself once every link is alive again.
 on:
   push:
     paths: ['**.html', 'tools/check-links.py', '.github/workflows/check-links.yml']
@@ -11,6 +16,10 @@ on:
   schedule:
     - cron: '0 13 * * 1'   # Mondays, 13:00 UTC
   workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   links:
@@ -23,4 +32,42 @@ jobs:
           python-version: '3.12'
 
       - name: Check every outgoing link
-        run: python3 tools/check-links.py
+        id: check
+        run: |
+          set +e
+          python3 tools/check-links.py --report broken.md
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          if [ -s broken.md ]; then
+            echo "::warning title=Broken links::$(wc -l < broken.md) dead link(s) on the site -- see the job summary"
+            { echo "## Broken links"; echo; cat broken.md; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit 0
+
+      - name: Remind about broken links
+        if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: Broken links on michalkouril.com
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          issue=$(gh issue list --state open --search "in:title \"$TITLE\"" \
+                    --json number --jq '.[0].number // empty')
+          if [ -s broken.md ]; then
+            {
+              echo "The link check found dead links. The site still deployed;"
+              echo "fix or remove these when you get a chance."
+              echo
+              cat broken.md
+              echo
+              echo "Last checked: $(date -u '+%Y-%m-%d %H:%M UTC') -- [run]($RUN_URL)"
+            } > body.md
+            if [ -n "$issue" ]; then
+              gh issue edit "$issue" --body-file body.md
+              gh issue comment "$issue" --body "Still broken as of $(date -u '+%Y-%m-%d'). [Run]($RUN_URL)"
+            else
+              gh issue create --title "$TITLE" --body-file body.md \
+                --assignee "${{ github.repository_owner }}"
+            fi
+          elif [ -n "$issue" ] && [ "${{ steps.check.outputs.status }}" = 0 ]; then
+            gh issue close "$issue" --comment "All links alive again. [Run]($RUN_URL)"
+          fi

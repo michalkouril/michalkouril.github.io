@@ -21,7 +21,8 @@ python3 tools/check-links.py              # everything
 python3 tools/check-links.py index.html   # one file
 ```
 
-It exits non-zero only for genuinely broken links. Publishers and LinkedIn refuse
+It exits non-zero only for genuinely broken links (the hook and CI below treat
+that as a warning, never a blocker). Publishers and LinkedIn refuse
 automated requests and return 403 — those are reported separately and don't fail the
 run, because failing on them would make the check noise. Server errors get one retry,
 and if nothing resolves at all it assumes you're offline and skips.
@@ -32,8 +33,10 @@ and if nothing resolves at all it assumes you're offline and skips.
 ln -sf ../../tools/pre-commit .git/hooks/pre-commit
 ```
 
-It runs when HTML is staged, and blocks the commit if a link is dead. Bypass with
-`git commit --no-verify`.
+It runs when HTML is staged and warns about dead links, but lets the commit through.
 
 **On push and weekly** — `.github/workflows/check-links.yml` runs it in CI, so link rot
-surfaces in the Actions tab even when nothing changes.
+surfaces even when nothing changes. The check is soft: the run stays green and the site
+deploys regardless. Dead links show as a warning on the run, and on `master` the workflow
+opens (or comments on) a **Broken links on michalkouril.com** issue assigned to you. The
+issue closes itself once every link is alive again.

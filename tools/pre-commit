@@ -4,8 +4,9 @@
 # Install (from the repo root):
 #     ln -sf ../../tools/pre-commit .git/hooks/pre-commit
 #
-# Only runs when HTML is staged. Skips itself when offline. To commit anyway:
-#     git commit --no-verify
+# Only runs when HTML is staged. Skips itself when offline. Broken links are
+# reported as a warning but never block the commit -- CI keeps a "Broken links"
+# issue open as the reminder.
 
 if ! git diff --cached --name-only --diff-filter=ACM | grep -q '\.html$'; then
     exit 0
@@ -18,10 +19,8 @@ fi
 
 cat <<'EOF'
 
-Commit stopped: at least one link above is broken.
-Fix the link, or bypass this check with:
-
-    git commit --no-verify
+Warning: at least one link above is broken. Committing anyway --
+fix it when you can.
 
 EOF
-exit 1
+exit 0

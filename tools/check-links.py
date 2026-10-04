@@ -3,6 +3,8 @@
 
     python3 tools/check-links.py            # check every .html in the repo
     python3 tools/check-links.py index.html # check specific files
+    python3 tools/check-links.py --report broken.md   # also list broken links
+                                                      # as Markdown (CI uses it)
 
 Exit status is 0 when nothing is broken, 1 when something is. Links that are
 merely refusing robots (publishers, LinkedIn) are reported but do not fail the
@@ -116,7 +118,22 @@ def check(url, _attempt=1):
     return url, 0, "unreachable"
 
 
+def write_report(path, broken):
+    """Write the broken links as a Markdown list, or remove a stale report."""
+    path = pathlib.Path(path)
+    if not broken:
+        path.unlink(missing_ok=True)
+        return
+    lines = [f"- `{tag}` {url} (in {where})" for url, tag, where in broken]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def main(argv):
+    report = None
+    if "--report" in argv:
+        i = argv.index("--report")
+        report = argv[i + 1]
+        argv = argv[:i] + argv[i + 2:]
     root = pathlib.Path(__file__).resolve().parent.parent
     if argv:
         paths = [pathlib.Path(a).resolve() for a in argv]
@@ -140,6 +157,8 @@ def main(argv):
     if results and all(s == 0 for _, s, _ in results):
         print(f"{C['warn']}No link resolved -- this machine looks offline. "
               f"Skipping the check.{C['off']}")
+        if report:
+            write_report(report, [])
         return 0
 
     broken, blocked, slow = [], [], []
@@ -172,6 +191,8 @@ def main(argv):
         for url, note, where in slow:
             print(f"    {url}  {C['dim']}[{note}]{C['off']}")
         print()
+    if report:
+        write_report(report, broken)
     if broken:
         print(f"{C['bad']}{len(broken)} BROKEN link(s):{C['off']}")
         for url, tag, where in broken:
