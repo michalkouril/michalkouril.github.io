@@ -54,6 +54,7 @@ python3 tools/update-stats.py             # rewrite index.html
 
 `.github/workflows/update-stats.yml` runs the same script every Monday (and on demand from
 the Actions tab) and commits to `master` when the numbers or the month change. Scholar
-sometimes blocks automated requests; the run then shows a warning, leaves the page as it
-is, and tries again the next week. It also refuses numbers that went down, since that
+sometimes blocks automated requests; the page then keeps its previous numbers and the
+workflow opens a **Scholar stats not updated** issue assigned to you (commented on each
+week it keeps failing, closed after the next successful update). It also refuses numbers that went down, since that
 means the scrape picked up the wrong thing.

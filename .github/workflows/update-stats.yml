@@ -4,9 +4,10 @@ name: Update Scholar stats
 # i10-index and "as of" month in the page header from Google Scholar, and
 # commit to master when anything visible changed (at most a date bump a month).
 #
-# Soft, like the link check: Scholar sometimes blocks automated requests, and
-# then the run shows a warning and leaves the page as it is. The next week tries
-# again.
+# Soft, like the link check: Scholar sometimes blocks automated requests. Then
+# the page keeps its previous numbers, and a "Scholar stats not updated" issue
+# is opened (assigned to you, so GitHub emails you) and commented on each week
+# it keeps failing. It closes itself after the next successful update.
 on:
   schedule:
     - cron: '17 14 * * 1'   # Mondays, 14:17 UTC (after the link check)
@@ -14,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: update-stats
@@ -32,11 +34,14 @@ jobs:
           python-version: '3.12'
 
       - name: Fetch Scholar numbers
+        id: fetch
         run: |
           set +e
-          python3 tools/update-stats.py
-          if [ $? -ne 0 ]; then
-            echo "::warning title=Stats not updated::Google Scholar could not be read -- see the log. The page keeps its current numbers."
+          python3 tools/update-stats.py 2>&1 | tee fetch.log
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          if [ "$status" -ne 0 ]; then
+            echo "::warning title=Stats not updated::Google Scholar could not be read -- the page keeps its current numbers."
           fi
           exit 0
 
@@ -53,3 +58,40 @@ jobs:
           # master may have moved while this ran.
           git pull -q --rebase origin master
           git push origin HEAD:master
+
+      - name: Notify when Scholar can't be read
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          STATUS: ${{ steps.fetch.outputs.status }}
+          TITLE: Scholar stats not updated
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          issue=$(gh issue list --state open --limit 200 --json number,title \
+                    --jq '[.[] | select(.title == env.TITLE)][0].number // empty')
+          if [ "$STATUS" = 0 ]; then
+            if [ -n "$issue" ]; then
+              gh issue close "$issue" --comment "Stats updated again. [Run]($RUN_URL)"
+            fi
+            exit 0
+          fi
+          {
+            echo "The weekly job couldn't read the Google Scholar profile, so the page"
+            echo "kept its previous numbers. It will try again next Monday; you can also"
+            echo "run **Update Scholar stats** from the Actions tab, or update by hand with"
+            echo "\`python3 tools/update-stats.py\`."
+            echo
+            echo '```'
+            cat fetch.log 2>/dev/null || echo "(the fetch step did not run)"
+            echo '```'
+            echo
+            echo "Last tried: $(date -u '+%Y-%m-%d %H:%M UTC') -- [run]($RUN_URL)"
+          } > body.md
+          if [ -z "$issue" ]; then
+            gh issue create --title "$TITLE" --body-file body.md --assignee "$OWNER"
+          else
+            gh issue edit "$issue" --body-file body.md
+            gh issue comment "$issue" --body "Still couldn't read Scholar on $(date -u '+%Y-%m-%d'). [Run]($RUN_URL)"
+          fi
