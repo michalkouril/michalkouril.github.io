@@ -32,16 +32,17 @@
   </head>
   <body>
      <div class="sitebar"><a href="../">&larr;&nbsp; Michal Kouril</a></div>
-     <h3>How to change Bloomsky WIFI parameters (via bluetooth - SKY2 only)</h3>
+     <h3>How to change BloomSky Wi-Fi settings (via Bluetooth, SKY2 only)</h3>
      <p id="support" class="message" role="alert" hidden></p>
 
      <div id="setup">
-       Hard reset your SKY2:<br>
+       Put your SKY2 in config mode:<br>
        <ol type="1">
-       <li>push the power button briefly</li>
-       <li>hold the wifi button for 8+ seconds</li>
+       <li>Press the power button for about 3 seconds. All three lights turn on. <b>The SKY2 must end up turned on.</b> If the left light then flashes by itself, the SKY2 is on. If it doesn't, the SKY2 is off, so press the power button again.</li>
+       <li>Wait about 5 seconds and watch the Wi-Fi icon. If it is already blinking <b>alternate</b> colors, the SKY2 is in config mode, so skip step 3. <b>If it is not, continue to step 3.</b></li>
+       <li>Hold the Wi-Fi button for at least 8 seconds.</li>
        </ol>
-       If successful the wifi icon will blink <b>alternate</b> colors.<br> If unsuccessful please try again.<br>
+       The SKY2 is in config mode when the Wi-Fi icon blinks <b>alternate</b> colors. If it doesn't, start again from step 1.<br>
        <hr>
        <form id="connectForm">
          <label for="name">Device Name (do not change): </label>
@@ -65,10 +66,10 @@
          <hr>
          <form id="wifiForm">
            <label for="wifi_ssid">Wi-Fi SSID: </label><br>
-           <input id="wifi_ssid" type="text" size="32" placeholder="Your WIFI SSID" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"><br>
+           <input id="wifi_ssid" type="text" size="32" placeholder="Your Wi-Fi SSID" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"><br>
            <label for="wifi_pass">Wi-Fi Password: </label><br>
-           <input id="wifi_pass" type="text" size="32" value="" placeholder="Your WIFI Password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"><br>
-           <button id="updatewifi" type="submit">Update WIFI</button>
+           <input id="wifi_pass" type="text" size="32" value="" placeholder="Your Wi-Fi Password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"><br>
+           <button id="updatewifi" type="submit">Update Wi-Fi</button>
            <button id="reboot" type="button">Reboot</button>
          </form>
 
@@ -86,6 +87,6 @@
       &nbsp;·&nbsp; <a href="../">michalkouril.com</a>
     </footer>
 
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
   </body>
 </html>

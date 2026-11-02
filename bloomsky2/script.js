@@ -25,7 +25,7 @@ const FINAL_RESULTS = {
   3: {
     kind: 'ok',
     text: 'Success: your SKY2 is on Wi-Fi and reaching the gateway. Click Reboot to finish. ' +
-          'Changing these settings again will need another hard reset.',
+          'Changing these settings again will mean putting it back in config mode.',
   },
   4: {
     kind: 'bad',
@@ -34,7 +34,7 @@ const FINAL_RESULTS = {
   5: {
     kind: 'bad',
     text: 'The SKY2 could not connect to Wi-Fi. Check the SSID and password and try again. ' +
-          'If it fails again, click Reboot, hard reset, and start over.',
+          'If it fails again, click Reboot, put it back in config mode, and start over.',
   },
 };
 
