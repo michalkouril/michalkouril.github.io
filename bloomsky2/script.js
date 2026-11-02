@@ -1,5 +1,7 @@
 'use strict';
 
+const SCRIPT_VERSION = '2026-11-02.1'; // Keep in step with index.html.
+
 const SVC_1802 = '00001802-0000-1000-8000-00805f9b34fb';
 const SVC_1803 = '00001803-0000-1000-8000-00805f9b34fb';
 const SVC_1804 = '00001804-0000-1000-8000-00805f9b34fb';
@@ -49,6 +51,7 @@ let command = null;
 
 let updating = false;
 let rebooting = false;
+let disconnecting = false;
 let statusMonitor = null;
 let monitorReadPending = false;
 let gattQueue = Promise.resolve();
@@ -82,7 +85,7 @@ const setResult = (text, kind) => {
 };
 
 function setControlsDisabled(disabled) {
-  ['#wifi_ssid', '#wifi_pass', '#updatewifi', '#reboot', '#getStatus'].forEach((selector) => {
+  ['#wifi_ssid', '#wifi_pass', '#updatewifi', '#reboot', '#disconnect', '#getStatus'].forEach((selector) => {
     $(selector).disabled = disabled;
   });
 }
@@ -91,6 +94,15 @@ function lockWifiForm() {
   ['#wifi_ssid', '#wifi_pass', '#updatewifi'].forEach((selector) => {
     $(selector).disabled = true;
   });
+}
+
+/* ---------- Versions ---------- */
+
+function showVersions() {
+  const versions = $('#versions');
+  const pageVersion = versions.dataset.pageVersion;
+  const mismatch = pageVersion === SCRIPT_VERSION ? '' : ' (versions differ, please reload this page)';
+  versions.textContent = `Page ${pageVersion} · Script ${SCRIPT_VERSION}${mismatch}`;
 }
 
 /* ---------- Bluetooth support ---------- */
@@ -181,18 +193,33 @@ function onDisconnected(event) {
 
   device = null;
   clearInterval(statusMonitor);
+  // A request lost with the connection must not block the next connection.
+  gattQueue = Promise.resolve();
+  monitorReadPending = false;
   $('#devicePanel').hidden = true;
   $('#connectHelp').hidden = false;
   $('#scan').disabled = false;
   $('#scan').textContent = 'Connect to SKY2 via Bluetooth';
 
-  if (rebooting) {
+  if (disconnecting) {
+    disconnecting = false;
+    setConnectMessage('Disconnected. Your SKY2 was not rebooted.', 'ok');
+  } else if (rebooting) {
     setConnectMessage('Your SKY2 is rebooting and has disconnected from Bluetooth. You can close this page.', 'ok');
   } else if (updating) {
     setConnectMessage('Your SKY2 disconnected before reporting a result. Connect again to check its status.', 'bad');
   } else {
     setConnectMessage('Your SKY2 disconnected. Connect again to continue.', 'warn');
   }
+}
+
+function onDisconnectClick() {
+  if (!isConnected() || updating || rebooting) return;
+  disconnecting = true;
+  const connectedDevice = device;
+  connectedDevice.gatt.disconnect();
+  // Don't depend on the event's timing; onDisconnected ignores a repeat.
+  onDisconnected({ target: connectedDevice });
 }
 
 /* ---------- Status ---------- */
@@ -412,5 +439,7 @@ $('#connectForm').addEventListener('submit', (event) => {
 $('#wifiForm').addEventListener('submit', onUpdateSubmit);
 $('#getStatus').addEventListener('click', onRefreshClick);
 $('#reboot').addEventListener('click', onRebootClick);
+$('#disconnect').addEventListener('click', onDisconnectClick);
 
+showVersions();
 checkBluetoothSupport();
