@@ -10,6 +10,8 @@ const CHAR_COMMAND = '00003a03-0000-1000-8000-00805f9b34fb'; // in 1804: selects
 
 const STATUS_TIMEOUT_MS = 30000; // A SKY2 still on "wait" after 30s has gone wrong.
 const STATUS_POLL_MS = 2000;
+const STATUS_MONITOR_MS = 5000; // Background check while connected and idle.
+const REBOOT_DISCONNECT_WAIT_MS = 5000;
 // A retry can read the previous attempt's result before the device overwrites
 // it, so a final status matching the one from before the update isn't trusted yet.
 const STALE_STATUS_GRACE_MS = 10000;
@@ -47,9 +49,20 @@ let command = null;
 
 let updating = false;
 let rebooting = false;
+let statusMonitor = null;
+let monitorReadPending = false;
+let gattQueue = Promise.resolve();
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const isConnected = () => Boolean(device && device.gatt.connected);
+
+/* Browsers reject a GATT operation while another is in flight, so the background
+   status check and the user's actions have to take turns. */
+function queueGatt(operation) {
+  const result = gattQueue.then(operation);
+  gattQueue = result.catch(() => {});
+  return result;
+}
 
 function describeStatus(code) {
   if (code === null) return 'No value';
@@ -156,8 +169,10 @@ function showConnected() {
   $('#progress').hidden = true;
   $('#reboot').classList.remove('primary');
   setControlsDisabled(false);
+  $('#connectHelp').hidden = true;
   $('#devicePanel').hidden = false;
   $('#wifi_ssid').focus();
+  statusMonitor = setInterval(checkStatusInBackground, STATUS_MONITOR_MS);
 }
 
 function onDisconnected(event) {
@@ -165,7 +180,9 @@ function onDisconnected(event) {
   console.log('Bluetooth device disconnected');
 
   device = null;
+  clearInterval(statusMonitor);
   $('#devicePanel').hidden = true;
+  $('#connectHelp').hidden = false;
   $('#scan').disabled = false;
   $('#scan').textContent = 'Connect to SKY2 via Bluetooth';
 
@@ -180,12 +197,38 @@ function onDisconnected(event) {
 
 /* ---------- Status ---------- */
 
+function setStatusCheck(text, checking) {
+  $('#statusCheck').classList.toggle('checking', checking);
+  $('#statusCheckText').textContent = text;
+  // The 5-second schedule doesn't apply during an update or reboot.
+  $('#statusCheckSchedule').hidden = updating || rebooting;
+}
+
 async function refreshStatus() {
-  const value = await statusOrSsid.readValue();
-  const code = value.byteLength ? value.getUint8(0) : null;
-  console.log(`Status is ${code}`);
-  $('#status').value = describeStatus(code);
-  return code;
+  setStatusCheck('Checking status…', true);
+  try {
+    const value = await queueGatt(() => statusOrSsid.readValue());
+    const code = value.byteLength ? value.getUint8(0) : null;
+    console.log(`Status is ${code}`);
+    $('#status').value = describeStatus(code);
+    setStatusCheck(`Last checked at ${new Date().toLocaleTimeString()}`, false);
+    return code;
+  } catch (error) {
+    setStatusCheck(`Could not read status: ${error.message}`, false);
+    throw error;
+  }
+}
+
+async function checkStatusInBackground() {
+  if (!isConnected() || updating || rebooting || monitorReadPending) return;
+  monitorReadPending = true;
+  try {
+    await refreshStatus();
+  } catch (error) {
+    // refreshStatus has shown the error; the next check tries again.
+  } finally {
+    monitorReadPending = false;
+  }
 }
 
 async function onRefreshClick() {
@@ -195,9 +238,10 @@ async function onRefreshClick() {
   try {
     await refreshStatus();
   } catch (error) {
-    if (isConnected()) $('#status').value = `Could not read status: ${error.message}`;
+    // refreshStatus has shown the error.
   } finally {
-    button.disabled = false;
+    // An update or reboot started meanwhile keeps its controls disabled.
+    button.disabled = updating || rebooting;
   }
 }
 
@@ -219,16 +263,16 @@ function addLog(text) {
 
 async function sendWifiSettings(ssid, pass) {
   const encoder = new TextEncoder();
-  const sendCommand = (code) => command.writeValue(new Uint8Array([code]));
+  const sendCommand = (code) => queueGatt(() => command.writeValue(new Uint8Array([code])));
 
   // The order of these writes is the SKY2's setup protocol. Each command picks
   // what the following write to the characteristics means.
   const steps = [
     ['Starting setup', () => sendCommand(1)],
     ['Preparing to receive the SSID', () => sendCommand(3)],
-    ['Sending the SSID', () => statusOrSsid.writeValue(encoder.encode(ssid))],
+    ['Sending the SSID', () => queueGatt(() => statusOrSsid.writeValue(encoder.encode(ssid)))],
     ['Preparing to receive the password', () => sendCommand(2)],
-    ['Sending the password', () => deviceIdOrPass.writeValue(encoder.encode(pass))],
+    ['Sending the password', () => queueGatt(() => deviceIdOrPass.writeValue(encoder.encode(pass)))],
     ['Saving the Wi-Fi settings', () => sendCommand(4)],
     ['Starting the Wi-Fi connection test', () => sendCommand(5)],
   ];
@@ -340,12 +384,16 @@ async function onRebootClick() {
 
   rebooting = true;
   setControlsDisabled(true);
+  setStatusCheck('Status checks stopped for the reboot', false);
   setResult('Sending the reboot command…');
   try {
-    await command.writeValue(new Uint8Array([7]));
+    await queueGatt(() => command.writeValue(new Uint8Array([7])));
     if (isConnected()) setResult('Reboot command sent. Your SKY2 should now restart.', 'ok');
   } catch (error) {
-    // The SKY2 may drop the link before acknowledging; onDisconnected covers that.
+    // The SKY2 may restart before acknowledging the command, and the disconnect
+    // can register late. Only report a failure if the link stays up.
+    setResult('Confirming the reboot…');
+    await sleep(REBOOT_DISCONNECT_WAIT_MS);
     if (isConnected()) {
       rebooting = false;
       setControlsDisabled(false);

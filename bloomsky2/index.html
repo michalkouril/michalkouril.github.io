@@ -23,6 +23,11 @@
       .message.ok{border-color:var(--ok)}
       .message.warn{border-color:var(--warn)}
       .message.bad{border-color:var(--bad)}
+      .help{margin:.5rem 0;font-size:.85rem;color:var(--ink-3)}
+      .dot{display:inline-block;width:.55rem;height:.55rem;margin-right:.45rem;border-radius:50%;background:var(--rule)}
+      .checking .dot{background:var(--accent);animation:pulse 1s ease-in-out infinite}
+      @keyframes pulse{50%{opacity:.3}}
+      @media (prefers-reduced-motion:reduce){.checking .dot{animation:none}}
       #progress{margin-top:1rem}
       #progressHeadline{margin:0 0 .35rem;font-size:.92rem;font-weight:500}
       #progressBar{display:block;width:100%;accent-color:var(--accent)}
@@ -50,6 +55,7 @@
          <button id="scan" type="submit">Connect to SKY2 via Bluetooth</button>
        </form>
        <p id="connectMessage" class="message" role="status" hidden></p>
+       <p id="connectHelp" class="help">SKY2 not in the device list? Check that its Wi-Fi icon is blinking <b>alternate</b> colors and that your computer supports Bluetooth Low Energy. On Windows, you can also try pairing the SKY2 in Bluetooth settings first.</p>
 
        <div id="devicePanel" hidden>
          <hr>
@@ -63,6 +69,7 @@
              <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
            </svg>
          </button>
+         <p id="statusCheck" class="help"><span class="dot" aria-hidden="true"></span><span id="statusCheckText"></span><span id="statusCheckSchedule"> · checks automatically every 5 seconds</span></p>
          <hr>
          <form id="wifiForm">
            <label for="wifi_ssid">Wi-Fi SSID: </label><br>
@@ -87,6 +94,6 @@
       &nbsp;·&nbsp; <a href="../">michalkouril.com</a>
     </footer>
 
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=4"></script>
   </body>
 </html>
