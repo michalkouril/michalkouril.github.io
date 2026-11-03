@@ -1,6 +1,6 @@
 'use strict';
 
-const SCRIPT_VERSION = '2026-11-03.1'; // Keep in step with index.html.
+const SCRIPT_VERSION = '2026-11-03.2'; // Keep in step with index.html.
 
 const SVC_1802 = '00001802-0000-1000-8000-00805f9b34fb';
 const SVC_1803 = '00001803-0000-1000-8000-00805f9b34fb';
@@ -103,6 +103,7 @@ function lockWifiForm() {
 const DEBUG_MAX_LINES = 500;
 const debugLines = [];
 let failedStep = null;
+let lastStatusError = null;
 
 function debug(text) {
   const time = new Date().toISOString().slice(11, 23);
@@ -240,14 +241,36 @@ async function onConnectClick() {
     statusOrSsid = await getCharacteristic(SVC_1803, CHAR_STATUS_OR_SSID);
     command = await getCharacteristic(SVC_1804, CHAR_COMMAND);
 
-    const idValue = await debugStep('Read device ID', () => deviceIdOrPass.readValue());
-    debug(`Device ID length: ${idValue.byteLength} bytes`);
-    $('#deviceid').value = new TextDecoder('utf-8').decode(idValue);
-    const code = await debugStep('Read status', () => refreshStatus());
-    debug(`Status on connect: ${describeStatus(code)}`);
+    // The setup only writes, so a refused read shouldn't stop it. A lost connection still should.
+    const readOptional = async (label, read) => {
+      try {
+        return await debugStep(label, read);
+      } catch (error) {
+        if (!isConnected()) throw error;
+        return undefined;
+      }
+    };
+    const unreadable = [];
 
-    showConnected();
-    debug('Connected and ready');
+    const idValue = await readOptional('Read device ID', () => deviceIdOrPass.readValue());
+    if (idValue === undefined) {
+      unreadable.push('device ID');
+      $('#deviceid').value = 'Not available';
+    } else {
+      debug(`Device ID length: ${idValue.byteLength} bytes`);
+      $('#deviceid').value = new TextDecoder('utf-8').decode(idValue);
+    }
+
+    const code = await readOptional('Read status', () => refreshStatus());
+    if (code === undefined) {
+      unreadable.push('status');
+      $('#status').value = 'Not available';
+    } else {
+      debug(`Status on connect: ${describeStatus(code)}`);
+    }
+
+    showConnected(unreadable);
+    debug(unreadable.length ? `Connected, but could not read: ${unreadable.join(', ')}` : 'Connected and ready');
   } catch (error) {
     const failedDevice = device;
     device = null; // Stops onDisconnected from replacing the message below.
@@ -284,9 +307,15 @@ async function logVisibleServices(failedDevice) {
   }
 }
 
-function showConnected() {
+function showConnected(unreadable) {
   rebooting = false;
-  setConnectMessage(`Connected to ${device.name || 'SKY2'}.`, 'ok');
+  const name = device.name || 'SKY2';
+  if (unreadable.length) {
+    setConnectMessage(`Connected to ${name}, but could not read its ${unreadable.join(' or ')}. You can still try the update below.`, 'warn');
+    $('#debug').open = true;
+  } else {
+    setConnectMessage(`Connected to ${name}.`, 'ok');
+  }
   $('#scan').textContent = 'Connected';
   setResult('');
   $('#progress').hidden = true;
@@ -350,9 +379,12 @@ async function refreshStatus() {
     console.log(`Status is ${code}`);
     $('#status').value = describeStatus(code);
     setStatusCheck(`Last checked at ${new Date().toLocaleTimeString()}`, false);
+    lastStatusError = null;
     return code;
   } catch (error) {
-    debug(`Status read failed: ${describeError(error)}`);
+    // Repeated checks would otherwise fill the log with the same line.
+    if (error.message !== lastStatusError) debug(`Status read failed: ${describeError(error)}`);
+    lastStatusError = error.message;
     setStatusCheck(`Could not read status: ${error.message}`, false);
     throw error;
   }
@@ -420,13 +452,15 @@ async function sendWifiSettings(ssid, pass) {
     const [label, run] = steps[i];
     setProgress(Math.round((i / steps.length) * 20), `${label}…`);
     addLog(label);
-    await run();
+    await debugStep(`Update step ${i + 1} of ${steps.length}: ${label}`, run);
   }
 }
 
-/* Returns the final status code, or null if there was none before the timeout. */
+/* Returns the final status code (null if none before the timeout), and whether
+   any status could be read at all. */
 async function waitForFinalStatus(statusBeforeUpdate) {
   const startedAt = Date.now();
+  let statusWasRead = false;
 
   for (let check = 1; isConnected(); check++) {
     const elapsedMs = Date.now() - startedAt;
@@ -438,6 +472,8 @@ async function waitForFinalStatus(statusBeforeUpdate) {
 
     try {
       const code = await refreshStatus();
+      statusWasRead = true;
+      debug(`Status after ${seconds}s: ${describeStatus(code)}`);
       const isFinal = code in FINAL_RESULTS;
       const isPossiblyStale = code === statusBeforeUpdate && elapsedMs < STALE_STATUS_GRACE_MS;
 
@@ -445,17 +481,17 @@ async function waitForFinalStatus(statusBeforeUpdate) {
         addLog(`${seconds}s: status ${describeStatus(code)} (may be from the last attempt, still checking)`);
       } else {
         addLog(`${seconds}s: status ${describeStatus(code)}`);
-        if (isFinal) return code;
+        if (isFinal) return { code, statusWasRead };
       }
     } catch (error) {
-      if (!isConnected()) return null;
+      if (!isConnected()) return { code: null, statusWasRead };
       addLog(`${seconds}s: could not read status (${error.message}), will retry`);
     }
 
-    if (Date.now() - startedAt + STATUS_POLL_MS > STATUS_TIMEOUT_MS) return null;
+    if (Date.now() - startedAt + STATUS_POLL_MS > STATUS_TIMEOUT_MS) return { code: null, statusWasRead };
     await sleep(STATUS_POLL_MS);
   }
-  return null;
+  return { code: null, statusWasRead };
 }
 
 async function onUpdateSubmit(event) {
@@ -477,15 +513,32 @@ async function onUpdateSubmit(event) {
   setProgress(0, 'Starting…');
 
   let locked = false;
+  failedStep = null;
+  debug('--- Update clicked');
   try {
-    const statusBeforeUpdate = await refreshStatus();
+    let statusBeforeUpdate = null;
+    try {
+      statusBeforeUpdate = await refreshStatus();
+    } catch (error) {
+      if (!isConnected()) throw error;
+      addLog('Could not read the status first, continuing');
+    }
+
     await sendWifiSettings(ssid, pass);
     addLog(`Waiting up to ${STATUS_TIMEOUT_MS / 1000}s for your SKY2 to report a result`);
 
-    const code = await waitForFinalStatus(statusBeforeUpdate);
+    const { code, statusWasRead } = await waitForFinalStatus(statusBeforeUpdate);
     if (!isConnected()) return; // onDisconnected has already told the user.
+    debug(`Update finished. Final status: ${code === null ? 'none' : describeStatus(code)}`);
 
-    if (code === null) {
+    if (!statusWasRead) {
+      setProgress(100, 'Settings sent, no status available');
+      setResult(
+        'The Wi-Fi settings were sent, but this device could not read the SKY2’s status to confirm them. ' +
+        'Check whether the Wi-Fi icon stops blinking alternate colors, then click Reboot and see whether your station comes online.',
+        'warn'
+      );
+    } else if (code === null) {
       setProgress(100, 'No result');
       setResult(
         `Your SKY2 did not report a result within ${STATUS_TIMEOUT_MS / 1000} seconds. ` +
@@ -504,7 +557,9 @@ async function onUpdateSubmit(event) {
     debug(`Update failed: ${describeError(error)}`);
     if (isConnected()) {
       setProgress($('#progressBar').value, 'Stopped');
-      setResult(`Could not send the Wi-Fi settings: ${withoutFinalPeriod(error.message)}. Try again.`, 'bad');
+      const where = failedStep ? ` (${failedStep})` : '';
+      setResult(`Could not send the Wi-Fi settings${where}: ${withoutFinalPeriod(error.message)}. Try again.`, 'bad');
+      $('#debug').open = true;
     }
   } finally {
     updating = false;
