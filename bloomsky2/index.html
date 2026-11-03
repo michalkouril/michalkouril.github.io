@@ -28,6 +28,9 @@
       .checking .dot{background:var(--accent);animation:pulse 1s ease-in-out infinite}
       @keyframes pulse{50%{opacity:.3}}
       @media (prefers-reduced-motion:reduce){.checking .dot{animation:none}}
+      #debug{margin:.75rem 0;font-size:.9rem}
+      #debug summary{cursor:pointer;color:var(--ink-2)}
+      #debugLog{max-height:20rem;overflow:auto;margin:.5rem 0;font-size:.75rem;white-space:pre-wrap;overflow-wrap:anywhere}
       #progress{margin-top:1rem}
       #progressHeadline{margin:0 0 .35rem;font-size:.92rem;font-weight:500}
       #progressBar{display:block;width:100%;accent-color:var(--accent)}
@@ -56,6 +59,12 @@
        </form>
        <p id="connectMessage" class="message" role="status" hidden></p>
        <p id="connectHelp" class="help">SKY2 not in the device list? Check that its Wi-Fi icon is blinking <b>alternate</b> colors and that your computer supports Bluetooth Low Energy. On Windows, you can also try pairing the SKY2 in Bluetooth settings first.</p>
+       <details id="debug">
+         <summary>Debug log</summary>
+         <p class="help">Copy this log when reporting a problem. It doesn’t include your Wi-Fi details or device ID. More detail is at <code>chrome://device-log</code> (Chrome) or <code>edge://device-log</code> (Edge).</p>
+         <pre id="debugLog"></pre>
+         <button id="debugCopy" type="button">Copy log</button>
+       </details>
 
        <div id="devicePanel" hidden>
          <hr>
@@ -95,9 +104,9 @@
       &nbsp;·&nbsp; <a href="../">michalkouril.com</a>
       <br>
       <!-- When changing script.js, use a new version here (both places) and in script.js. -->
-      <span id="versions" data-page-version="2026-11-02.1">Page 2026-11-02.1 · Script version unknown</span>
+      <span id="versions" data-page-version="2026-11-03.1">Page 2026-11-03.1 · Script version unknown</span>
     </footer>
 
-    <script src="script.js?v=2026-11-02.1"></script>
+    <script src="script.js?v=2026-11-03.1"></script>
   </body>
 </html>

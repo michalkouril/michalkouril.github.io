@@ -1,6 +1,6 @@
 'use strict';
 
-const SCRIPT_VERSION = '2026-11-02.1'; // Keep in step with index.html.
+const SCRIPT_VERSION = '2026-11-03.1'; // Keep in step with index.html.
 
 const SVC_1802 = '00001802-0000-1000-8000-00805f9b34fb';
 const SVC_1803 = '00001803-0000-1000-8000-00805f9b34fb';
@@ -96,6 +96,79 @@ function lockWifiForm() {
   });
 }
 
+/* ---------- Debug log ----------
+   Shown on the page so people can copy it into a bug report. Never add the
+   Wi-Fi SSID or password, or the device ID, to this log. */
+
+const DEBUG_MAX_LINES = 500;
+const debugLines = [];
+let failedStep = null;
+
+function debug(text) {
+  const time = new Date().toISOString().slice(11, 23);
+  debugLines.push(`${time} ${text}`);
+  if (debugLines.length > DEBUG_MAX_LINES) debugLines.shift();
+  const log = $('#debugLog');
+  log.textContent = debugLines.join('\n');
+  log.scrollTop = log.scrollHeight;
+  console.log(text);
+}
+
+const describeError = (error) => `${error.name}: ${error.message}`;
+const withoutFinalPeriod = (text) => text.replace(/\.$/, '');
+
+/* Runs fn immediately, so requestDevice stays inside the user's click. */
+async function debugStep(label, fn) {
+  const startedAt = performance.now();
+  const elapsed = () => `${Math.round(performance.now() - startedAt)} ms`;
+  debug(`${label}...`);
+  try {
+    const result = await fn();
+    debug(`${label}: OK (${elapsed()})`);
+    return result;
+  } catch (error) {
+    failedStep = label;
+    debug(`${label}: FAILED after ${elapsed()}: ${describeError(error)}`);
+    throw error;
+  }
+}
+
+function describeProperties(characteristic) {
+  const properties = characteristic.properties || {};
+  const names = ['read', 'write', 'writeWithoutResponse', 'notify', 'indicate',
+    'broadcast', 'authenticatedSignedWrites', 'reliableWrite', 'writableAuxiliaries'];
+  return names.filter((name) => properties[name]).join(', ') || 'none reported';
+}
+
+async function logEnvironment() {
+  debug(`Page ${$('#versions').dataset.pageVersion}, script ${SCRIPT_VERSION}. Times are UTC.`);
+  debug(`User agent: ${navigator.userAgent}`);
+  debug(`Secure context: ${window.isSecureContext}. Web Bluetooth API: ${Boolean(navigator.bluetooth)}.`);
+  if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+    try {
+      // The user agent string can't tell Windows 10 from 11, but platformVersion can (13+ is 11).
+      const data = await navigator.userAgentData.getHighEntropyValues(['platformVersion', 'architecture', 'fullVersionList']);
+      const browsers = (data.fullVersionList || []).map((b) => `${b.brand} ${b.version}`).join(', ');
+      debug(`Platform: ${data.platform} ${data.platformVersion} (${data.architecture}). Browsers: ${browsers}.`);
+    } catch (error) {
+      debug(`Could not read platform details: ${describeError(error)}`);
+    }
+  }
+}
+
+async function copyDebugLog() {
+  const button = $('#debugCopy');
+  try {
+    await navigator.clipboard.writeText(debugLines.join('\n'));
+    button.textContent = 'Copied';
+  } catch (error) {
+    // Clipboard access can be refused, so select the text for a manual copy.
+    window.getSelection().selectAllChildren($('#debugLog'));
+    button.textContent = 'Press Ctrl+C or Cmd+C to copy';
+  }
+  setTimeout(() => { button.textContent = 'Copy log'; }, 3000);
+}
+
 /* ---------- Versions ---------- */
 
 function showVersions() {
@@ -126,8 +199,14 @@ function checkBluetoothSupport() {
       available ? null : 'warn'
     );
   };
-  navigator.bluetooth.getAvailability().then(showAvailability, () => {});
-  navigator.bluetooth.addEventListener('availabilitychanged', (event) => showAvailability(event.value));
+  navigator.bluetooth.getAvailability().then((available) => {
+    debug(`Bluetooth adapter available: ${available}`);
+    showAvailability(available);
+  }, (error) => debug(`Could not check for a Bluetooth adapter: ${describeError(error)}`));
+  navigator.bluetooth.addEventListener('availabilitychanged', (event) => {
+    debug(`Bluetooth adapter available changed to: ${event.value}`);
+    showAvailability(event.value);
+  });
 }
 
 /* ---------- Connecting ---------- */
@@ -139,37 +218,69 @@ async function onConnectClick() {
 
   $('#scan').disabled = true;
   setConnectMessage('Choose your SKY2 in the browser’s Bluetooth window…');
+  failedStep = null;
+  debug(`--- Connect clicked. Filters: ${JSON.stringify(options.filters)}`);
 
   try {
-    device = await navigator.bluetooth.requestDevice(options);
+    device = await debugStep('Choose device (requestDevice)', () => navigator.bluetooth.requestDevice(options));
+    debug(`Chosen device name: ${device.name || '(none reported)'}`);
+    device.addEventListener('gattserverdisconnected', logDisconnectEvent);
     device.addEventListener('gattserverdisconnected', onDisconnected);
 
     setConnectMessage('Connecting to your SKY2…');
-    const server = await device.gatt.connect();
+    const server = await debugStep('Connect to GATT server', () => device.gatt.connect());
 
-    const getCharacteristic = async (service, characteristic) =>
-      (await server.getPrimaryService(service)).getCharacteristic(characteristic);
+    const getCharacteristic = async (serviceUuid, characteristicUuid) => {
+      const service = await debugStep(`Get service ${serviceUuid.slice(4, 8)}`, () => server.getPrimaryService(serviceUuid));
+      const characteristic = await debugStep(`Get characteristic ${characteristicUuid.slice(4, 8)}`, () => service.getCharacteristic(characteristicUuid));
+      debug(`Characteristic ${characteristicUuid.slice(4, 8)} properties: ${describeProperties(characteristic)}`);
+      return characteristic;
+    };
     deviceIdOrPass = await getCharacteristic(SVC_1802, CHAR_DEVICE_ID_OR_PASS);
     statusOrSsid = await getCharacteristic(SVC_1803, CHAR_STATUS_OR_SSID);
     command = await getCharacteristic(SVC_1804, CHAR_COMMAND);
 
-    const id = new TextDecoder('utf-8').decode(await deviceIdOrPass.readValue());
-    $('#deviceid').value = id;
-    await refreshStatus();
+    const idValue = await debugStep('Read device ID', () => deviceIdOrPass.readValue());
+    debug(`Device ID length: ${idValue.byteLength} bytes`);
+    $('#deviceid').value = new TextDecoder('utf-8').decode(idValue);
+    const code = await debugStep('Read status', () => refreshStatus());
+    debug(`Status on connect: ${describeStatus(code)}`);
 
     showConnected();
+    debug('Connected and ready');
   } catch (error) {
     const failedDevice = device;
     device = null; // Stops onDisconnected from replacing the message below.
-    if (failedDevice && failedDevice.gatt.connected) failedDevice.gatt.disconnect();
+    const cancelled = error.name === 'NotFoundError' && /cancel/i.test(error.message);
 
-    console.log('Connection failed:', error);
-    if (error.name === 'NotFoundError' && /cancel/i.test(error.message)) {
+    if (failedDevice) {
+      debug(`Still connected after the failure: ${failedDevice.gatt.connected}`);
+      if (failedDevice.gatt.connected) {
+        await logVisibleServices(failedDevice);
+        failedDevice.gatt.disconnect();
+      }
+    }
+
+    if (cancelled) {
       setConnectMessage('No device selected. Click Connect to try again.');
     } else {
-      setConnectMessage(`Could not connect: ${error.message}`, 'bad');
+      setConnectMessage(`Could not connect (${failedStep || 'unknown step'}): ${withoutFinalPeriod(error.message)}. See the debug log below.`, 'bad');
+      $('#debug').open = true;
     }
     $('#scan').disabled = false;
+  }
+}
+
+function logDisconnectEvent() {
+  debug('Browser reported a disconnect (gattserverdisconnected)');
+}
+
+async function logVisibleServices(failedDevice) {
+  try {
+    const services = await failedDevice.gatt.getPrimaryServices();
+    debug(`Services this page can see: ${services.map((service) => service.uuid.slice(4, 8)).join(', ') || 'none'}`);
+  } catch (error) {
+    debug(`Could not list services: ${describeError(error)}`);
   }
 }
 
@@ -241,6 +352,7 @@ async function refreshStatus() {
     setStatusCheck(`Last checked at ${new Date().toLocaleTimeString()}`, false);
     return code;
   } catch (error) {
+    debug(`Status read failed: ${describeError(error)}`);
     setStatusCheck(`Could not read status: ${error.message}`, false);
     throw error;
   }
@@ -389,10 +501,10 @@ async function onUpdateSubmit(event) {
       }
     }
   } catch (error) {
-    console.log('Update failed:', error);
+    debug(`Update failed: ${describeError(error)}`);
     if (isConnected()) {
       setProgress($('#progressBar').value, 'Stopped');
-      setResult(`Could not send the Wi-Fi settings: ${error.message}. Try again.`, 'bad');
+      setResult(`Could not send the Wi-Fi settings: ${withoutFinalPeriod(error.message)}. Try again.`, 'bad');
     }
   } finally {
     updating = false;
@@ -440,6 +552,7 @@ $('#wifiForm').addEventListener('submit', onUpdateSubmit);
 $('#getStatus').addEventListener('click', onRefreshClick);
 $('#reboot').addEventListener('click', onRebootClick);
 $('#disconnect').addEventListener('click', onDisconnectClick);
+$('#debugCopy').addEventListener('click', copyDebugLog);
 
 showVersions();
-checkBluetoothSupport();
+logEnvironment().finally(checkBluetoothSupport);
