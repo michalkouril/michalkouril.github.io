@@ -65,6 +65,10 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Protocol - must match bloomsky2/script.js exactly.
 # ---------------------------------------------------------------------------
+# Printed at startup so you can confirm which copy of this file is running.
+# Bump this whenever the file changes.
+SCRIPT_VERSION = "2026-11-05.1"
+
 DEVICE_NAME = "BSKY"
 
 SVC_1802 = "00001802-0000-1000-8000-00805f9b34fb"
@@ -446,6 +450,7 @@ COMMANDS = {
 
 def main():
     args = build_parser().parse_args()
+    log(f"sky2.py version {SCRIPT_VERSION}")
     try:
         return asyncio.run(COMMANDS[args.command](args))
     except KeyboardInterrupt:
