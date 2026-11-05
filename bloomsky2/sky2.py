@@ -67,7 +67,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Printed at startup so you can confirm which copy of this file is running.
 # Bump this whenever the file changes.
-SCRIPT_VERSION = "2026-11-05.1"
+SCRIPT_VERSION = "2026-11-05.2"
 
 DEVICE_NAME = "BSKY"
 
@@ -149,12 +149,23 @@ async def cmd_scan(args):
         devices.items(), key=lambda kv: (kv[1][1].rssi or -999), reverse=True
     ):
         name = dev.name or adv.local_name or "(no name)"
-        marker = ""
-        if name == DEVICE_NAME:
-            marker = "   <-- this is your SKY2"
-            found_sky2 = True
+        is_sky2 = name == DEVICE_NAME
+        found_sky2 = found_sky2 or is_sky2
+        marker = "   <-- this is your SKY2" if is_sky2 else ""
         rssi = adv.rssi if adv.rssi is not None else "?"
         log(f"  {address}   rssi {rssi:>4}   {name}{marker}")
+        # For the SKY2 (or everything under -v), show what it advertises. Which
+        # services it lists here, and its manufacturer data, help us understand
+        # why Windows later refuses discovery.
+        if is_sky2 or args.verbose:
+            uuids = adv.service_uuids or []
+            short = ", ".join(u[4:8] if len(u) >= 8 else u for u in uuids) or "(none)"
+            log(f"        advertised services: {short}")
+            if adv.manufacturer_data:
+                ids = ", ".join(f"0x{k:04x}" for k in adv.manufacturer_data)
+                log(f"        manufacturer data from: {ids}")
+            if adv.service_data:
+                log(f"        service data for: {', '.join(adv.service_data)}")
     log("")
     if found_sky2:
         log(f'Found "{DEVICE_NAME}". Next run:  py sky2.py connect')
