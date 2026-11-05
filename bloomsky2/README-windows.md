@@ -94,12 +94,28 @@ log.
 
 ## If it doesn't work
 
-Run the command again with `-v` and send back everything it prints:
+`connect` tries three different ways to talk to the SKY2 before giving up, so a
+failure means all three didn't work.
+
+**"Application-specific Error 0x80" (or any GATT error on every attempt):**
+Windows is usually holding a stale pairing or cache for the SKY2. Clear it:
+
+1. Open **Settings → Devices → Bluetooth & other devices**.
+2. If **BSKY** or an unknown/other device is listed, click it, then **Remove**.
+3. Turn Bluetooth **off and back on** (same screen).
+4. Put the SKY2 back in config mode (Wi-Fi icon blinking alternate colors).
+5. Run the command again.
+
+Staying within a few feet of the SKY2 helps, and make sure no phone or other
+computer is connected to it at the same time.
+
+**Still failing?** Run the command again with `-v` and send back everything it
+prints:
 
 ```
 py sky2.py connect -v
 ```
 
-The error it shows tells us whether it's a Bluetooth driver, pairing, or range
-problem. Also note your Windows version and whether the laptop has Bluetooth
-turned on (Settings → Devices → Bluetooth & other devices).
+Also note your Windows version (Settings → System → About) and whether the
+laptop's Bluetooth is on. The verbose output tells us whether it's a pairing,
+driver, or range problem.

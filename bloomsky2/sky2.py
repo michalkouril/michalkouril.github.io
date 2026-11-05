@@ -55,7 +55,6 @@ import sys
 
 try:
     from bleak import BleakClient, BleakScanner
-    from bleak.exc import BleakError
 except ImportError:
     sys.exit(
         "The 'bleak' library isn't installed.\n"
@@ -86,7 +85,6 @@ STATUS_TEXT = {
     5: "Not good: could not connect to Wi-Fi",
 }
 
-CONNECT_ATTEMPTS = 3
 CONNECT_TIMEOUT = 20.0      # seconds per connection attempt
 SCAN_TIMEOUT = 12.0         # seconds
 STATUS_POLL_SECONDS = 2.0
@@ -166,32 +164,67 @@ async def cmd_scan(args):
 # ---------------------------------------------------------------------------
 # Connecting
 # ---------------------------------------------------------------------------
+OUR_SERVICES = [SVC_1802, SVC_1803, SVC_1804]
+
+# Each strategy is a different way to ask Windows to discover the SKY2's GATT
+# services. On Windows 10 one approach often fails with an app-specific error
+# (0x80) because of a stale GATT cache, or a sibling service that aborts a full
+# discovery; trying a few in turn usually gets one through. The 'winrt' options
+# only apply on Windows and are ignored elsewhere.
+CONNECT_STRATEGIES = [
+    ("fresh discovery, SKY2 services only",
+        dict(services=OUR_SERVICES, winrt={"use_cached_services": False})),
+    ("cached discovery, SKY2 services only",
+        dict(services=OUR_SERVICES, winrt={"use_cached_services": True})),
+    ("fresh discovery, all services",
+        dict(winrt={"use_cached_services": False})),
+]
+
+
+def make_client(device, extra):
+    """Build a BleakClient, tolerating an older bleak without the winrt kwarg."""
+    try:
+        return BleakClient(device, timeout=CONNECT_TIMEOUT, **extra)
+    except TypeError:
+        trimmed = {k: v for k, v in extra.items() if k != "winrt"}
+        return BleakClient(device, timeout=CONNECT_TIMEOUT, **trimmed)
+
+
 async def connect(args, device):
-    """Connect to the device with a few retries. Returns a connected BleakClient."""
+    """Connect to the device, trying several discovery strategies in turn."""
     last_error = None
-    for attempt in range(1, CONNECT_ATTEMPTS + 1):
-        log(f"Connecting (attempt {attempt} of {CONNECT_ATTEMPTS}) ...")
-        client = BleakClient(device, timeout=CONNECT_TIMEOUT)
+    total = len(CONNECT_STRATEGIES)
+    for index, (label, extra) in enumerate(CONNECT_STRATEGIES, start=1):
+        log(f"Connecting (attempt {index} of {total}: {label}) ...")
+        client = make_client(device, extra)
         try:
             await client.connect()
             if client.is_connected:
                 log("Connected.")
                 return client
             last_error = "connect() returned but the device is not connected"
-        except BleakError as e:
-            last_error = f"{type(e).__name__}: {e}"
         except asyncio.TimeoutError:
             last_error = f"timed out after {CONNECT_TIMEOUT:.0f}s"
         except Exception as e:  # noqa: BLE001 - report anything the OS throws
             last_error = f"{type(e).__name__}: {e}"
-        vlog(args, f"attempt {attempt} failed: {last_error}")
+        vlog(args, f"attempt {index} failed: {last_error}")
         try:
             await client.disconnect()
         except Exception:
             pass
-        if attempt < CONNECT_ATTEMPTS:
+        if index < total:
             await asyncio.sleep(1.5)
-    raise RuntimeError(f"Could not connect. Last error: {last_error}")
+    raise RuntimeError(
+        f"Could not connect after {total} attempts. Last error: {last_error}\n\n"
+        "An app-specific error such as 0x80 usually means Windows is holding a "
+        "stale pairing or cache for the SKY2. Try this, then run the command "
+        "again:\n"
+        "  1. Open Settings -> Devices -> Bluetooth & other devices.\n"
+        "  2. If 'BSKY' or an unknown/other device is listed, click it, then Remove.\n"
+        "  3. Turn Bluetooth off and back on.\n"
+        "  4. Put the SKY2 back in config mode (Wi-Fi icon blinking alternate colors).\n"
+        "Staying within a few feet of the SKY2 also helps."
+    )
 
 
 def list_services(args, client):
