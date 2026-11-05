@@ -85,7 +85,8 @@ STATUS_TEXT = {
     5: "Not good: could not connect to Wi-Fi",
 }
 
-CONNECT_TIMEOUT = 20.0      # seconds per connection attempt
+CONNECT_TIMEOUT = 20.0      # seconds per plain connection attempt
+PAIR_TIMEOUT = 45.0         # longer, since pairing may prompt the user
 SCAN_TIMEOUT = 12.0         # seconds
 STATUS_POLL_SECONDS = 2.0
 STATUS_WATCH_SECONDS = 40.0
@@ -166,37 +167,48 @@ async def cmd_scan(args):
 # ---------------------------------------------------------------------------
 OUR_SERVICES = [SVC_1802, SVC_1803, SVC_1804]
 
-# Each strategy is a different way to ask Windows to discover the SKY2's GATT
-# services. On Windows 10 one approach often fails with an app-specific error
-# (0x80) because of a stale GATT cache, or a sibling service that aborts a full
-# discovery; trying a few in turn usually gets one through. The 'winrt' options
-# only apply on Windows and are ignored elsewhere.
+# (label, kwargs, timeout). Each is a different way to get Windows to enumerate
+# the SKY2's GATT services. A consistent app-specific error (0x80) on every
+# non-pairing attempt points to the firmware refusing service discovery until
+# the connection is paired/bonded - the documented reason bleak offers pair=True
+# ("necessary to pair the device first in order to be able to even enumerate the
+# services"). So the first attempts try plain discovery (fast, no Windows bond),
+# and the last two pair first. 'winrt' options apply only on Windows; 'pair' and
+# 'services' apply everywhere.
 CONNECT_STRATEGIES = [
     ("fresh discovery, SKY2 services only",
-        dict(services=OUR_SERVICES, winrt={"use_cached_services": False})),
+        dict(services=OUR_SERVICES, winrt={"use_cached_services": False}), CONNECT_TIMEOUT),
     ("cached discovery, SKY2 services only",
-        dict(services=OUR_SERVICES, winrt={"use_cached_services": True})),
+        dict(services=OUR_SERVICES, winrt={"use_cached_services": True}), CONNECT_TIMEOUT),
     ("fresh discovery, all services",
-        dict(winrt={"use_cached_services": False})),
+        dict(winrt={"use_cached_services": False}), CONNECT_TIMEOUT),
+    ("pair, then fresh discovery, SKY2 services only",
+        dict(services=OUR_SERVICES, pair=True, winrt={"use_cached_services": False}), PAIR_TIMEOUT),
+    ("pair, then fresh discovery, all services",
+        dict(pair=True, winrt={"use_cached_services": False}), PAIR_TIMEOUT),
 ]
 
 
-def make_client(device, extra):
-    """Build a BleakClient, tolerating an older bleak without the winrt kwarg."""
-    try:
-        return BleakClient(device, timeout=CONNECT_TIMEOUT, **extra)
-    except TypeError:
-        trimmed = {k: v for k, v in extra.items() if k != "winrt"}
-        return BleakClient(device, timeout=CONNECT_TIMEOUT, **trimmed)
+def make_client(device, kwargs, timeout):
+    """Build a BleakClient, dropping kwargs that an older bleak doesn't accept."""
+    for drop in ([], ["winrt"], ["winrt", "pair"]):
+        trimmed = {k: v for k, v in kwargs.items() if k not in drop}
+        try:
+            return BleakClient(device, timeout=timeout, **trimmed)
+        except TypeError:
+            continue
+    return BleakClient(device, timeout=timeout)
 
 
 async def connect(args, device):
     """Connect to the device, trying several discovery strategies in turn."""
     last_error = None
     total = len(CONNECT_STRATEGIES)
-    for index, (label, extra) in enumerate(CONNECT_STRATEGIES, start=1):
+    for index, (label, kwargs, timeout) in enumerate(CONNECT_STRATEGIES, start=1):
         log(f"Connecting (attempt {index} of {total}: {label}) ...")
-        client = make_client(device, extra)
+        if "pair" in kwargs:
+            log("  (If Windows shows a prompt or notification to pair/set up BSKY, allow it.)")
+        client = make_client(device, kwargs, timeout)
         try:
             await client.connect()
             if client.is_connected:
@@ -215,15 +227,20 @@ async def connect(args, device):
         if index < total:
             await asyncio.sleep(1.5)
     raise RuntimeError(
-        f"Could not connect after {total} attempts. Last error: {last_error}\n\n"
-        "An app-specific error such as 0x80 usually means Windows is holding a "
-        "stale pairing or cache for the SKY2. Try this, then run the command "
-        "again:\n"
-        "  1. Open Settings -> Devices -> Bluetooth & other devices.\n"
-        "  2. If 'BSKY' or an unknown/other device is listed, click it, then Remove.\n"
-        "  3. Turn Bluetooth off and back on.\n"
-        "  4. Put the SKY2 back in config mode (Wi-Fi icon blinking alternate colors).\n"
-        "Staying within a few feet of the SKY2 also helps."
+        f"Could not connect after {total} attempts (including pairing). "
+        f"Last error: {last_error}\n\n"
+        "A consistent app-specific error such as 0x80 means the SKY2 is refusing "
+        "service discovery. Things to try, then run the command again:\n"
+        "  1. Clear any stale pairing: Settings -> Devices -> Bluetooth & other\n"
+        "     devices; if 'BSKY' or an unknown device is listed, Remove it; then\n"
+        "     turn Bluetooth off and back on.\n"
+        "  2. Make sure the SKY2 is fully in config mode: the Wi-Fi icon must be\n"
+        "     blinking ALTERNATE colors, not solid or a single color.\n"
+        "  3. Make sure no phone or other computer is connected to it, and stay\n"
+        "     within a few feet.\n\n"
+        "If it still fails, install the free 'nRF Connect for Mobile' app on an\n"
+        "Android phone, Scan, Connect to BSKY, and note whether it connects and\n"
+        "what it shows - that tells us exactly what the SKY2 requires."
     )
 
 

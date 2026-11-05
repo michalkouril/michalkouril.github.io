@@ -94,28 +94,33 @@ log.
 
 ## If it doesn't work
 
-`connect` tries three different ways to talk to the SKY2 before giving up, so a
-failure means all three didn't work.
+`connect` tries **five** different ways to talk to the SKY2 before giving up:
+three plain attempts, then two that pair with the device first. If one of the
+pairing attempts runs, **Windows may show a prompt or a notification to pair or
+"set up BSKY" - allow/accept it.** A failure means all five didn't work.
 
-**"Application-specific Error 0x80" (or any GATT error on every attempt):**
-Windows is usually holding a stale pairing or cache for the SKY2. Clear it:
+**"Application-specific Error 0x80" (or the same GATT error on every attempt):**
+The SKY2 is refusing to list its services. Try, in order:
 
-1. Open **Settings → Devices → Bluetooth & other devices**.
-2. If **BSKY** or an unknown/other device is listed, click it, then **Remove**.
-3. Turn Bluetooth **off and back on** (same screen).
-4. Put the SKY2 back in config mode (Wi-Fi icon blinking alternate colors).
-5. Run the command again.
+1. **Clear any stale pairing.** Open **Settings → Devices → Bluetooth & other
+   devices**. If **BSKY** or an unknown device is listed, click it, then
+   **Remove**. Turn Bluetooth **off and back on**.
+2. **Double-check config mode.** The Wi-Fi icon must be blinking **alternate
+   colors**, not solid or a single color. If not, hold the Wi-Fi button ~8s.
+3. **Be close and alone.** Stay within a few feet, and make sure no phone or
+   other computer is connected to the SKY2 at the same time.
+4. Run the command again.
 
-Staying within a few feet of the SKY2 helps, and make sure no phone or other
-computer is connected to it at the same time.
-
-**Still failing?** Run the command again with `-v` and send back everything it
-prints:
+**Still failing?** Run it with `-v` and send back everything it prints:
 
 ```
 py sky2.py connect -v
 ```
 
 Also note your Windows version (Settings → System → About) and whether the
-laptop's Bluetooth is on. The verbose output tells us whether it's a pairing,
-driver, or range problem.
+laptop's Bluetooth is on.
+
+**A useful cross-check from a phone:** install the free **nRF Connect for
+Mobile** app (Android), tap **Scan**, and **Connect** to **BSKY**. Whether it
+connects, and what error or services it shows, tells us exactly what the SKY2
+requires - which decides what to try next.
